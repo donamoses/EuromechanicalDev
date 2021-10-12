@@ -1,0 +1,41 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "emec-approval-wp-client-side-solution",
+    "id": "057d2f7a-bfc7-41a7-852d-397c0eee6016",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "webApiPermissionRequests": [{  
+      "resource": "Microsoft Graph",  
+      "scope": "User.Read.All"  
+    },
+    {
+      "resource": "Microsoft Graph",
+      "scope": "Files.Read"
+    },
+    {
+      "resource": "Microsoft Graph",
+      "scope": "Files.ReadWrite"
+    },
+    {
+      "resource": "Microsoft Graph",
+      "scope": "Sites.ReadWrite.All"
+    },
+    {
+      "resource": "Microsoft Graph",
+      "scope": "Group.Read.All"
+    }
+  ]
+  },
+  "paths": {
+    "zippedPackage": "solution/emec-approval-wp.sppkg"
+  }
+}
