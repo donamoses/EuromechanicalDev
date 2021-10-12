@@ -1,0 +1,41 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "182cfe0b-3f80-4d98-b463-fdf910e6a080",
+  "alias": "EmecApprovalWpWebPart",
+  "componentType": "WebPart",
+
+  // The "*" signifies that the version should be taken from the package.json
+  "version": "*",
+  "manifestVersion": 2,
+
+  // If true, the component can only be installed on sites where Custom Script is allowed.
+  // Components that allow authors to embed arbitrary script code should set this to true.
+  // https://support.office.com/en-us/article/Turn-scripting-capabilities-on-or-off-1f2c515f-5d7e-448a-9fd7-835da935584f
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Other
+    "group": { "default": "Other" },
+    "title": { "default": "EMEC_ApprovalWP" },
+    "description": { "default": "EMEC_ApprovalWP description" },
+    "officeFabricIconFontName": "Page",
+    "properties": {
+      "description": "EMEC_ApprovalWP",
+      "notificationPreference":"Notification Preference Settings",
+      "emailNotification":"Email Nofication Settings",
+      "hubUrl":"https://ccsdev01.sharepoint.com/sites/emechub/",
+      "userMessageSettings":"User Message Settings",
+      "WorkflowHeaderList":"WorkflowHeader",
+      "DocumentIndexList":"DocumentIndex",
+      "WorkflowDetailsList":"WorkflowDetails",
+      "SourceDocument":"SourceDocuments",
+      "PublishedDocument":"PublishedDocuments",
+      "DocumentRevisionLogList":"DocumentRevisionLog",
+      "TransmittalCodeSettingsList":"TransmittalCodeSettings",
+      "WorkflowTasksList":"Workflow Tasks",
+      "AccessGroups":"Permission Matrix Settings",
+      "DepartmentList":"Department"
+    }
+  }]
+}
