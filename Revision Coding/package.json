@@ -1,5 +1,5 @@
 {
-  "name": "emec-approval-wp",
+  "name": "revision-coding",
   "version": "0.0.1",
   "private": true,
   "main": "lib/index.js",
@@ -14,18 +14,11 @@
     "@microsoft/sp-office-ui-fabric-core": "1.12.1",
     "@microsoft/sp-property-pane": "1.12.1",
     "@microsoft/sp-webpart-base": "1.12.1",
-    "@pnp/sp": "^2.8.0",
-    "@pnp/spfx-controls-react": "1.13.2",
-    "docx-pdf": "0.0.1",
-    "jspdf": "^2.3.1",
-    "moment": "^2.29.1",
+    "@pnp/sp": "^2.9.0",
     "office-ui-fabric-react": "7.156.0",
     "react": "16.9.0",
     "react-dom": "16.9.0",
-    "react-html-parser": "^2.0.2",
-    "react-responsive": "^9.0.0-beta.4",
-    "replace-string": "^4.0.0",
-    "simple-react-validator": "^1.6.1"
+    "replace-string": "^4.0.0"
   },
   "devDependencies": {
     "@types/react": "16.9.36",

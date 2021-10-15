@@ -1,24 +1,26 @@
 import { WebPartContext } from "@microsoft/sp-webpart-base";
-export interface IEmecApprovalWpProps {
-  description: string;
-  project: string;
+export interface IEmecSendRequestProps {
   context: WebPartContext;
-  RedirectUrl: string;
   siteUrl:string;
+  RedirectUrl:string;
   hubUrl:string;
+  userMessageSettings:string;
+  DocumentIndexList:string;
+  project: string;
   notificationPreference:string;
   emailNotification:string;
-  userMessageSettings:string;
   WorkflowHeaderList:string;
-  DocumentIndexList:string;
   TransmittalCodeSettingsList:string;
   WorkflowDetailsList:string;
-  SourceDocument:string;
-  PublishedDocument:string;
   DocumentRevisionLogList:string;
   WorkflowTasksList:string;
+  SourceDocumentLibrary:string;
+  RevisionLevelList:string;
+  TaskDelegationSettings:string;
+  RevisionHistoryPage:string;
+  DocumentApprovalPage:string;
+  DocumentReviewPage:string;
   AccessGroups:string;
   DepartmentList:string;
-  SourceDocumentLibrary:string;
-}
 
+}
