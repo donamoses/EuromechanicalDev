@@ -1,0 +1,39 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "emec-send-request-client-side-solution",
+    "id": "7c930c4f-19cb-404b-83c1-a020adaa5fde",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "webApiPermissionRequests": [  
+      {  
+        "resource": "Microsoft Graph",  
+        "scope": "User.ReadBasic.All"  
+      },  
+      {  
+        "resource": "Microsoft Graph",  
+        "scope": "Mail.Send"  
+      },
+      {  
+        "resource": "Microsoft Graph",  
+         "scope": "Sites.ReadWrite.All" 
+      },
+      {  
+        "resource": "Microsoft Graph",  
+         "scope": "Files.ReadWrite.All" 
+      }
+     
+  ]   
+  },
+  "paths": {
+    "zippedPackage": "solution/emec-send-request.sppkg"
+  }
+}

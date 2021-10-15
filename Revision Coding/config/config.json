@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "revision-coding-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/revisionCoding/RevisionCodingWebPart.js",
+          "manifest": "./src/webparts/revisionCoding/RevisionCodingWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "RevisionCodingWebPartStrings": "lib/webparts/revisionCoding/loc/{locale}.js"
+  }
+}

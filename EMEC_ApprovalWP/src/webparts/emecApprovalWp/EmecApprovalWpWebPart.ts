@@ -43,7 +43,8 @@ export default class EmecApprovalWpWebPart extends BaseClientSideWebPart<IEmecAp
         TransmittalCodeSettingsList:this.properties.TransmittalCodeSettingsList,
         WorkflowTasksList:this.properties.WorkflowTasksList,
         AccessGroups:this.properties.AccessGroups,
-        DepartmentList:this.properties.DepartmentList
+        DepartmentList:this.properties.DepartmentList,
+        SourceDocumentLibrary:this.properties.SourceDocumentLibrary
       }
     );
 
@@ -103,6 +104,9 @@ export default class EmecApprovalWpWebPart extends BaseClientSideWebPart<IEmecAp
                 }),
                 PropertyPaneTextField('SourceDocument',{
                   label:'Source Document Library'
+                }),
+                PropertyPaneTextField('SourceDocumentLibrary',{
+                  label:'Source Document View Library'
                 }),
                 PropertyPaneTextField('WorkflowHeaderList',{
                   label:'WorkflowHeaderList'

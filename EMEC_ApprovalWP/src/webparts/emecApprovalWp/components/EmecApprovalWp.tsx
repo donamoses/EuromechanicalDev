@@ -12,7 +12,8 @@ import "@pnp/sp/items";
 import * as moment from 'moment';
 import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
 import * as strings from 'EmecApprovalWpWebPartStrings';
-import { MSGraphClient, HttpClientResponse, IHttpClientOptions, HttpClient } from '@microsoft/sp-http';
+// import { MSGraphClient, HttpClientResponse, IHttpClientOptions, HttpClient } from '@microsoft/sp-http';
+import {MSGraphClient, HttpClient, SPHttpClient, HttpClientConfiguration, HttpClientResponse, ODataVersion, IHttpClientConfiguration, IHttpClientOptions, ISPHttpClientOptions } from '@microsoft/sp-http';
 import replaceString from 'replace-string';
 import "@pnp/sp/files";
 import "@pnp/sp/folders";
@@ -161,6 +162,7 @@ export default class EmecApprovalWp extends React.Component<IEmecApprovalWpProps
     this._onCancel = this._onCancel.bind(this);
     this.AcceptanceChanged = this.AcceptanceChanged.bind(this);
     this._revisioncoding = this._revisioncoding.bind(this);
+    this.publishupdate = this.publishupdate.bind(this);
   }
   private workflowHeaderID;
   private documentIndexID;
@@ -207,7 +209,7 @@ export default class EmecApprovalWp extends React.Component<IEmecApprovalWpProps
      this.documentIndexID = HeaderItem.DocumentIndexID;
     
     //Get Access
-    // this.accessGroups();
+    this.accessGroups();
    
     //Check Current User is approver
     if (userEmail == ApproverEmail) {
@@ -267,29 +269,37 @@ const DepartmentItem: any = await this.reqWeb.lists.getByTitle(this.props.Depart
 console.log(DepartmentItem.AccessGroups);
 var result = AccessGroupItems.indexOf(DepartmentItem.AccessGroups);
 console.log(result);
-const groups = await this.reqWeb.siteGroups();
-console.log(groups);
-  //User in HO Group
-  try {
-    let grp1: any[] = await this.reqWeb.siteGroups.getByName(AccessGroupItems[result]).users();
-    for (let i = 0; i < grp1.length; i++) {
-        if (this.CurrentEmail == grp1[i].Email) {
-            ok = "Yes"
-        }
-      }
-  if(ok != "Yes"){
-    this.setState({
-      accessDeniedMsgBar: "",
-      statusMessage: { isShowMessage: true, message: this.InvalidUser, messageType: 1 },
-    });
-    setTimeout(() => {
-      this.setState({ accessDeniedMsgBar: 'none', });
-      window.location.replace(this.RedirectUrl);
-    }, 5000);
+const postURL = "https://prod-05.uaecentral.logic.azure.com:443/workflows/60862323b80c44369d5bc091f5490bfa/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=QzrPWl7wN5e6k873vy-X9qNeBk0VJojo1M7CzwslVsA";
+
+const requestHeaders: Headers = new Headers();
+requestHeaders.append("Content-type", "application/json");
+const body: string = JSON.stringify({
+  'Groupid':'4e798fae-1571-4352-9ea5-67ba554e729c',
+  'CurrentUserMail':this.CurrentEmail
+  
+});
+const postOptions: IHttpClientOptions = {
+   headers: requestHeaders,
+   body: body
+};
+let responseText: string = "";
+let response = await this.props.context.httpClient.post(postURL, HttpClient.configurations.v1, postOptions);
+let responseJSON = await response.json();
+responseText = JSON.stringify(responseJSON);
+ console.log(responseJSON);
+if (response.ok) {
+  
+  console.log(responseJSON.ValidUser);
+  this.setState({
+    access: "none",
+    accessDeniedMsgBar: "",
+    statusMessage: { isShowMessage: true, message: this.InvalidUser, messageType: 4 }
+  });
+  
+}
+else {
 }
 
-}
-catch { }
 
   }
   //Bind Approval Form
@@ -324,8 +334,10 @@ catch { }
     this.documentIndexID = HeaderItem.DocumentIndexID;
     RequesterName = HeaderItem.Requester.Title;
     RequesterEmail = HeaderItem.Requester.EMail;
-    // var reqdate = new Date(HeaderItem.RequestedDate.toString()).toLocaleString();
-    // RequestedDate = moment(reqdate).format('DD-MMM-YYYY HH:mm');
+    if(HeaderItem.RequestedDate != null){
+    var reqdate = new Date(HeaderItem.RequestedDate.toString()).toLocaleString();
+    RequestedDate = moment(reqdate).format('DD-MMM-YYYY HH:mm');
+    }
     RequesterComment = HeaderItem.RequesterComment;
     var duedate = new Date(HeaderItem.DueDate.toString()).toLocaleString();
     DueDate = moment(duedate).format('DD-MMM-YYYY HH:mm');
@@ -495,7 +507,7 @@ catch { }
   }
   //Revision History Url
   private _openRevisionHistory = () => {
-    window.open(this.props.siteUrl + "/SitePages/RevisionHistory.aspx?ID=" + this.documentIndexID);
+    window.open(this.props.siteUrl + "/SitePages/RevisionHistory.aspx?did=" + this.documentIndexID);
   }
   private _onPublishTransmittal = (ev: React.FormEvent<HTMLInputElement>, isChecked?: boolean) => {
     if (isChecked == true) {
@@ -566,9 +578,6 @@ catch { }
         });
 
         this._publish();
-
-
-
       }
       else {
         this.validator.showMessages();
@@ -598,138 +607,7 @@ catch { }
     }
 
   }
-  //Document Published
-  public _publish = async () => {
-    this._revisioncoding();
-    const postURL = "https://prod-22.uaecentral.logic.azure.com:443/workflows/2fec0e6b5b3642a692a466951503751a/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=TXMLhWRMwxiaNOQ9HMGE5C_qsRBqhJ70uQx5ccEUgTE";
-
-    const requestHeaders: Headers = new Headers();
-    requestHeaders.append("Content-type", "application/json");
-    const body: string = JSON.stringify({
-      'Status': 'Published',
-      'PublishFormat': this.state.publishOption,
-      'SourceDocumentID': this.sourceDocumentID,
-      'SiteURL': this.props.siteUrl,
-      'DocumentName': this.state.documentName,
-      'PublishedDocumentLibrary': this.props.PublishedDocument,
-      'Revision': this.currentrevision,
-      'PublishedDate': this.today
-    });
-    const postOptions: IHttpClientOptions = {
-       headers: requestHeaders,
-       body: body
-    };
-    let responseText: string = "";
-    this.props.context.httpClient.post(postURL, HttpClient.configurations.v1, postOptions).then((response: HttpClientResponse) => {
-        response.json().then((responseJSON: JSON) => {
-            console.log(response);
-            responseText = JSON.stringify(responseJSON);
-            console.log(responseJSON);
-            if (response.ok) {
-  }
-   else {}
-})
-.catch((responsee: any) => {
-let errMsg: string = `WARNING - error when calling URL ${postURL}. Error = ${responsee.message}`;
- console.log(errMsg);
-});
-});
-
-  }
-//   public _publish = async () => {
-//     this._revisioncoding();
-//     if (this.state.publishOption == "PDF") {
-
-//       //****Get MS Flow & its response*****/
-
-//       const postURL = "https://prod-22.uaecentral.logic.azure.com:443/workflows/2fec0e6b5b3642a692a466951503751a/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=TXMLhWRMwxiaNOQ9HMGE5C_qsRBqhJ70uQx5ccEUgTE";
-
-//       const body: string = JSON.stringify({
-//         'Status': 'Published',
-//         'PublishFormat': this.state.publishOption,
-//         'SourceDocumentID': this.sourceDocumentID,
-//         'SiteURL': this.props.siteUrl,
-//         'DocumentName': this.state.documentName,
-//         'PublishedDocumentLibrary': this.props.PublishedDocument,
-//         'Revision': this.currentrevision,
-//         'PublishedDate': this.today
-
-//       });
-
-//       const requestHeaders: Headers = new Headers();
-//       requestHeaders.append('Content-type', 'application/json');
-
-//       const httpClientOptions: IHttpClientOptions = {
-//         body: body,
-//         headers: requestHeaders
-//       };
-// let responseText:string = "";
-
-//       return this.props.context.httpClient.post(
-//         postURL,
-//         HttpClient.configurations.v1,
-//         httpClientOptions)
-//         .then((response: HttpClientResponse): Promise<HttpClientResponse> => {
-//           return response.json();
-        
-//         });
-
-//     }
-
-//     if (this.state.hideproject == true) {
-//       await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentIndexList).items.getById(this.documentIndexID).update({
-//         PublishFormat: this.state.publishOption,
-//         WorkflowStatus: "Published",
-//         Revision: this.currentrevision
-//       });
-
-//       await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).update({
-//         ApprovedDate: this.today,
-//         WorkflowStatus: "Published",
-//         PublishFormat: this.state.publishOption,
-//         Revision: this.currentrevision,
-//       });
-
-//       await sp.web.getList(this.props.siteUrl + "/" + this.props.SourceDocument).items.getById(this.sourceDocumentID).update({
-//         PublishFormat: this.state.publishOption,
-//         WorkflowStatus: "Published",
-//         Revision: this.currentrevision
-//       });
-//     }
-//     else {
-//       await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentIndexList).items.getById(this.documentIndexID).update({
-//         PublishFormat: this.state.publishOption,
-//         WorkflowStatus: "Published",
-//         Revision: this.currentrevision,
-//         AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
-//       });
-
-//       await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).update({
-//         ApprovedDate: this.today,
-//         WorkflowStatus: "Published",
-//         PublishFormat: this.state.publishOption,
-//         Revision: this.currentrevision,
-//         AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
-//       });
-//       await sp.web.getList(this.props.siteUrl + "/" + this.props.SourceDocument).items.getById(this.sourceDocumentID).update({
-//         PublishFormat: this.state.publishOption,
-//         WorkflowStatus: "Published",
-//         Revision: this.currentrevision,
-//         AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
-//       });
-//     }
-//     this._sendmail(this.state.ownerEmail, "DocPublish", this.state.ownerName);
-//     this._sendmail(this.state.requesterEmail, "DocPublish", this.state.RequesterName);
-//     let a = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentRevisionLogList).items.getById(this.RevisionLogId).update({
-//       Status: "Published"
-//     });
-//     await this.reqWeb.lists.getByTitle(this.props.WorkflowTasksList).items.getById(parseInt(this.state.TaskID)).delete();
-//     setTimeout(() => {
-//       this.setState({ statusMessage: { isShowMessage: true, message: this.documentApprovedSuccess, messageType: 4 } });
-//       window.location.replace(this.RedirectUrl);
-//     }, 5000);
-
-//   }
+  
   public _revisioncoding = async () => {
 
     if (this.props.project) {
@@ -743,6 +621,120 @@ let errMsg: string = `WARNING - error when calling URL ${postURL}. Error = ${res
       this.currentrevision = rev.toString();
     }
   }
+  //Document Published
+  protected async _publish(){
+    this._revisioncoding();
+    const postURL = "https://prod-22.uaecentral.logic.azure.com:443/workflows/2fec0e6b5b3642a692a466951503751a/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=TXMLhWRMwxiaNOQ9HMGE5C_qsRBqhJ70uQx5ccEUgTE";
+
+    const requestHeaders: Headers = new Headers();
+    requestHeaders.append("Content-type", "application/json");
+    const body: string = JSON.stringify({
+      'Status': 'Published',
+      'PublishFormat': this.state.publishOption,
+      'SourceDocumentID': this.sourceDocumentID,
+      'SiteURL': this.props.siteUrl,
+      'DocumentName': this.state.documentName,
+      'PublishedDocumentLibrary': this.props.PublishedDocument,
+      'Revision': this.currentrevision,
+      'PublishedDate': this.today,
+      'SourceDocumentLibrary':this.props.SourceDocumentLibrary
+    });
+    const postOptions: IHttpClientOptions = {
+       headers: requestHeaders,
+       body: body
+    };
+    let responseText: string = "";
+    let response = await this.props.context.httpClient.post(postURL, HttpClient.configurations.v1, postOptions);
+    let responseJSON = await response.json();
+    responseText = JSON.stringify(responseJSON);
+     console.log(responseJSON);
+    if (response.ok) {
+      
+      this.publishupdate(responseJSON.PublishDocID);
+    }
+    else {
+    }
+  }
+public async publishupdate(publishid){
+  let SD =  await sp.web.getList(this.props.siteUrl + "/" + this.props.SourceDocument).items.getById(this.sourceDocumentID).get();
+
+  await sp.web.getList(this.props.siteUrl + "/" + this.props.PublishedDocument).items.getById(publishid).update({
+    DocumentID:this.state.documentID,
+    DocumentName:this.state.documentName,
+    DocumentIndexId:this.documentIndexID,
+    PublishedDate:this.today,
+    BusinessUnit:SD.BusinessUnit,
+    Category:SD.Category,
+    SubCategory:SD.SubCategory,
+    ApproverId:SD.ApproverId,
+    PublishFormat: this.state.publishOption,
+    WorkflowStatus: "Published",
+    Revision: this.currentrevision,
+    ExpiryLeadPeriod:SD.ExpiryLeadPeriod,
+    OwnerId:SD.OwnerId,
+    RevisionHistory: {
+      "__metadata": { type: "SP.FieldUrlValue" },
+      Description: "Revision Log",
+      Url: this.props.siteUrl + "/SitePages/RevisionHistory.aspx?did=" + this.documentIndexID
+    },
+    ReviewersId: { results: SD.ReviewersId },
+  });
+
+if (this.state.hideproject == true) {
+                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentIndexList).items.getById(this.documentIndexID).update({
+                  PublishFormat: this.state.publishOption,
+                  WorkflowStatus: "Published",
+                  Revision: this.currentrevision
+                });
+          
+                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).update({
+                  ApprovedDate: this.today,
+                  WorkflowStatus: "Published",
+                  PublishFormat: this.state.publishOption,
+                  Revision: this.currentrevision,
+                });
+          
+                await sp.web.getList(this.props.siteUrl + "/" + this.props.SourceDocument).items.getById(this.sourceDocumentID).update({
+                  PublishFormat: this.state.publishOption,
+                  WorkflowStatus: "Published",
+                  Revision: this.currentrevision
+                });
+              }
+              else {
+                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentIndexList).items.getById(this.documentIndexID).update({
+                  PublishFormat: this.state.publishOption,
+                  WorkflowStatus: "Published",
+                  Revision: this.currentrevision,
+                  AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
+                });
+          
+                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).update({
+                  ApprovedDate: this.today,
+                  WorkflowStatus: "Published",
+                  PublishFormat: this.state.publishOption,
+                  Revision: this.currentrevision,
+                  AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
+                });
+                await sp.web.getList(this.props.siteUrl + "/" + this.props.SourceDocument).items.getById(this.sourceDocumentID).update({
+                  PublishFormat: this.state.publishOption,
+                  WorkflowStatus: "Published",
+                  Revision: this.currentrevision,
+                  AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
+                });
+              }
+              this._sendmail(this.state.ownerEmail, "DocPublish", this.state.ownerName);
+              this._sendmail(this.state.requesterEmail, "DocPublish", this.state.RequesterName);
+              let a = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentRevisionLogList).items.getById(this.RevisionLogId).update({
+                Status: "Published"
+              });
+              await this.reqWeb.lists.getByTitle(this.props.WorkflowTasksList).items.getById(parseInt(this.state.TaskID)).delete();
+              setTimeout(() => {
+                this.setState({ statusMessage: { isShowMessage: true, message: this.documentApprovedSuccess, messageType: 4 } });
+                window.location.replace(this.RedirectUrl);
+              }, 5000);
+
+}
+ 
   //Document Return
   public _returndoc = async () => {
     let message;

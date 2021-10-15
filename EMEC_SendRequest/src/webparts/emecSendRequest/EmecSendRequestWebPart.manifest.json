@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "182cfe0b-3f80-4d98-b463-fdf910e6a080",
-  "alias": "EmecApprovalWpWebPart",
+  "id": "e3f920bc-280a-495c-9a1f-14a3aa5d6df6",
+  "alias": "EmecSendRequestWebPart",
   "componentType": "WebPart",
 
   // The "*" signifies that the version should be taken from the package.json
@@ -17,11 +17,11 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Other
     "group": { "default": "Other" },
-    "title": { "default": "EMEC_ApprovalWP" },
-    "description": { "default": "EMEC_ApprovalWP description" },
+    "title": { "default": "EMEC_SendRequest" },
+    "description": { "default": "EMEC_SendRequest description" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "description": "EMEC_ApprovalWP",
+      "description": "EMEC_SendRequest",
       "notificationPreference":"Notification Preference Settings",
       "emailNotification":"Email Nofication Settings",
       "hubUrl":"https://ccsdev01.sharepoint.com/sites/emechub/",
@@ -29,14 +29,19 @@
       "WorkflowHeaderList":"WorkflowHeader",
       "DocumentIndexList":"DocumentIndex",
       "WorkflowDetailsList":"WorkflowDetails",
-      "SourceDocument":"SourceDocuments",
+      "SourceDocumentLibrary":"SourceDocuments",
       "PublishedDocument":"PublishedDocuments",
       "DocumentRevisionLogList":"DocumentRevisionLog",
       "TransmittalCodeSettingsList":"TransmittalCodeSettings",
       "WorkflowTasksList":"Workflow Tasks",
+      "RevisionLevelList":"RevisionLevel",
+      "TaskDelegationSettings":"Task Delegation Settings",
+      "RevisionHistoryPage":"RevisionHistory",
+      "DocumentApprovalPage":"DocumentApproval",
+      "DocumentReviewPage":"DocumentReview",
       "AccessGroups":"Permission Matrix Settings",
-      "DepartmentList":"Department",
-      "SourceDocumentLibrary":"Source Documents"
+      "DepartmentList":"Department"
+
     }
   }]
 }

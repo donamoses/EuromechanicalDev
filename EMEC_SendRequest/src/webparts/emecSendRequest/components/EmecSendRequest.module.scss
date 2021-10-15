@@ -1,0 +1,42 @@
+@import '~office-ui-fabric-react/dist/sass/References.scss';
+
+.emecSendRequest {
+  div.alignCenter  {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center,
+  }
+
+  div.flex{
+    display: flex;
+  }
+  div.width{
+    width: 50%;
+  }
+  .cmnt{
+    overflow-x:auto;
+    }
+  .mt{
+    margin-top: 10px;
+  }
+  div.drpdwn {
+ width: 100%;
+  }
+  input{
+    height: 30px;
+    width: 100%;
+  }
+  // .title-155{
+  //   height: 34px;
+  // }
+  .btn{
+    margin-right: 10px;
+    border-radius: 5px;
+    border: 1px solid gray;
+    margin-bottom: 5px;
+  }
+  .rgtalign{
+    width: 100%;
+    text-align: right;
+  }
+}
