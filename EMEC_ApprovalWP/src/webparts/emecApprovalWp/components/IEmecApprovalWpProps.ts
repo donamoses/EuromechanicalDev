@@ -3,22 +3,26 @@ export interface IEmecApprovalWpProps {
   description: string;
   project: string;
   context: WebPartContext;
-  RedirectUrl: string;
+  redirectUrl: string;
   siteUrl:string;
   hubUrl:string;
   notificationPreference:string;
   emailNotification:string;
   userMessageSettings:string;
-  WorkflowHeaderList:string;
-  DocumentIndexList:string;
-  TransmittalCodeSettingsList:string;
-  WorkflowDetailsList:string;
-  SourceDocument:string;
-  PublishedDocument:string;
-  DocumentRevisionLogList:string;
-  WorkflowTasksList:string;
-  AccessGroups:string;
-  DepartmentList:string;
-  SourceDocumentLibrary:string;
+  workflowHeaderList:string;
+  documentIndexList:string;
+  transmittalCodeSettingsList:string;
+  workflowDetailsList:string;
+  sourceDocument:string;
+  publishedDocument:string;
+  documentRevisionLogList:string;
+  workflowTasksList:string;
+  PermissionMatrixSettings:string;
+  departmentList:string;
+  sourceDocumentLibrary:string;
+  siteAddress:string;
+  accessGroupDetailsList:string;
+  hubsite:string;
+  projectInformationListName:string;
 }
 

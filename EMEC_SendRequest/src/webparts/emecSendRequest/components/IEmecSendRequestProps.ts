@@ -22,5 +22,7 @@ export interface IEmecSendRequestProps {
   DocumentReviewPage:string;
   AccessGroups:string;
   DepartmentList:string;
-
+  AccessGroupDetailsList:string;
+  hubsite:string;
+  projectInformationListName:string;
 }

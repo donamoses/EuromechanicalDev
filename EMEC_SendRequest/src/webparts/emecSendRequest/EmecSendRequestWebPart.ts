@@ -31,27 +31,30 @@ export default class EmecSendRequestWebPart extends BaseClientSideWebPart<IEmecS
       EmecSendRequest,
       {
         context: this.context,
-        siteUrl:this.context.pageContext.web.serverRelativeUrl,
-        hubUrl:this.properties.hubUrl,
-        RedirectUrl:this.properties.RedirectUrl,
+        siteUrl: this.context.pageContext.web.serverRelativeUrl,
+        hubUrl: this.properties.hubUrl,
+        RedirectUrl: this.properties.RedirectUrl,
         project: this.properties.project,
-        notificationPreference:this.properties.notificationPreference,
-        emailNotification:this.properties.emailNotification,
-        userMessageSettings:this.properties.userMessageSettings,
-        WorkflowHeaderList:this.properties.WorkflowHeaderList,
-        DocumentIndexList:this.properties.DocumentIndexList,
-        WorkflowDetailsList:this.properties.WorkflowDetailsList,
-        SourceDocumentLibrary:this.properties.SourceDocumentLibrary,
-        DocumentRevisionLogList:this.properties.DocumentRevisionLogList,
-        TransmittalCodeSettingsList:this.properties.TransmittalCodeSettingsList,
-        WorkflowTasksList:this.properties.WorkflowTasksList,
-        RevisionLevelList:this.properties.RevisionLevelList,
-        TaskDelegationSettings:this.properties.TaskDelegationSettings,
-        RevisionHistoryPage:this.properties.RevisionHistoryPage,
-        DocumentApprovalPage:this.properties.DocumentApprovalPage,
-        DocumentReviewPage:this.properties.DocumentReviewPage,
-        AccessGroups:this.properties.AccessGroups,
-        DepartmentList:this.properties.DepartmentList
+        notificationPreference: this.properties.notificationPreference,
+        emailNotification: this.properties.emailNotification,
+        userMessageSettings: this.properties.userMessageSettings,
+        WorkflowHeaderList: this.properties.WorkflowHeaderList,
+        DocumentIndexList: this.properties.DocumentIndexList,
+        WorkflowDetailsList: this.properties.WorkflowDetailsList,
+        SourceDocumentLibrary: this.properties.SourceDocumentLibrary,
+        DocumentRevisionLogList: this.properties.DocumentRevisionLogList,
+        TransmittalCodeSettingsList: this.properties.TransmittalCodeSettingsList,
+        WorkflowTasksList: this.properties.WorkflowTasksList,
+        RevisionLevelList: this.properties.RevisionLevelList,
+        TaskDelegationSettings: this.properties.TaskDelegationSettings,
+        RevisionHistoryPage: this.properties.RevisionHistoryPage,
+        DocumentApprovalPage: this.properties.DocumentApprovalPage,
+        DocumentReviewPage: this.properties.DocumentReviewPage,
+        AccessGroups: this.properties.AccessGroups,
+        DepartmentList: this.properties.DepartmentList,
+        AccessGroupDetailsList: this.properties.AccessGroupDetailsList,
+        hubsite: this.properties.hubsite,
+        projectInformationListName: this.properties.projectInformationListName
       }
     );
 
@@ -77,20 +80,20 @@ export default class EmecSendRequestWebPart extends BaseClientSideWebPart<IEmecS
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-               PropertyPaneTextField('DocumentIndexList',{
-                  label:'Document Index List'
+                PropertyPaneTextField('DocumentIndexList', {
+                  label: 'Document Index List'
                 }),
-                PropertyPaneTextField('SourceDocumentLibrary',{
+                PropertyPaneTextField('SourceDocumentLibrary', {
                   label: 'Source Document Library'
                 }),
-                PropertyPaneTextField('WorkflowHeaderList',{
-                  label:'WorkflowHeaderList'
+                PropertyPaneTextField('WorkflowHeaderList', {
+                  label: 'WorkflowHeaderList'
                 }),
-                PropertyPaneTextField('WorkflowDetailsList',{
-                  label:'Workflow Details List'
+                PropertyPaneTextField('WorkflowDetailsList', {
+                  label: 'Workflow Details List'
                 }),
-               PropertyPaneTextField('DocumentRevisionLogList',{
-                  label:'Document RevisionLog List'
+                PropertyPaneTextField('DocumentRevisionLogList', {
+                  label: 'Document RevisionLog List'
                 }),
                 PropertyPaneTextField('RedirectUrl', {
                   label: 'Redirect Url'
@@ -100,60 +103,67 @@ export default class EmecSendRequestWebPart extends BaseClientSideWebPart<IEmecS
             {
               groupName: "HubSite",
               groupFields: [
-                PropertyPaneTextField('hubUrl',{
-                  label:'HubUrl'
+                PropertyPaneTextField('hubUrl', {
+                  label: 'HubUrl'
                 }),
-                PropertyPaneTextField('AccessGroups',{
-                  label:'Access Groups List'
+                PropertyPaneTextField('hubsite', {
+                  label: 'hubsite'
                 }),
-                PropertyPaneTextField('notificationPreference',{
-                  label:'Notification Preference'
+                PropertyPaneTextField('AccessGroups', {
+                  label: 'Access Groups List'
                 }),
-                PropertyPaneTextField('emailNotification',{
-                  label:'Email Notification'
+                PropertyPaneTextField('notificationPreference', {
+                  label: 'Notification Preference'
                 }),
-                PropertyPaneTextField('userMessageSettings',{
-                  label:'User Message Settings'
+                PropertyPaneTextField('emailNotification', {
+                  label: 'Email Notification'
                 }),
-                PropertyPaneTextField('WorkflowTasksList',{
-                  label:'Workflow Tasks List'
+                PropertyPaneTextField('userMessageSettings', {
+                  label: 'User Message Settings'
                 }),
-                PropertyPaneTextField('TaskDelegationSettings',{
-                  label:'Task Delegation Settings'
+                PropertyPaneTextField('WorkflowTasksList', {
+                  label: 'Workflow Tasks List'
                 }),
-                PropertyPaneTextField('TaskDelegationSettings',{
-                  label:'Task Delegation Settings'
+                PropertyPaneTextField('TaskDelegationSettings', {
+                  label: 'Task Delegation Settings'
                 }),
+                PropertyPaneTextField('AccessGroupDetailsList', {
+                  label: 'Access Group Details List'
+                }),
+                PropertyPaneTextField('DepartmentList', {
+                  label: 'Department List'
+                }),
+
               ]
             },
             {
               groupName: "Pages",
               groupFields: [
-                PropertyPaneTextField('DocumentReviewPage',{
-                  label:'Document Review Page'
+                PropertyPaneTextField('DocumentReviewPage', {
+                  label: 'Document Review Page'
                 }),
-                PropertyPaneTextField('DocumentApprovalPage',{
-                  label:'Document Approval Page'
+                PropertyPaneTextField('DocumentApprovalPage', {
+                  label: 'Document Approval Page'
                 }),
-                PropertyPaneTextField('RevisionHistoryPage',{
-                  label:'Revision History Page'
+                PropertyPaneTextField('RevisionHistoryPage', {
+                  label: 'Revision History Page'
                 }),
               ]
             },
-    
+
             {
               groupName: "Project",
               groupFields: [
-                PropertyPaneToggle('project',{
-                  label:'Project',
+                PropertyPaneToggle('project', {
+                  label: 'Project',
                   onText: 'On',
                   offText: 'Off'
                 }),
-                PropertyPaneTextField('RevisionLevelList',{
-                  label:'Revision Level List'
+                PropertyPaneTextField('RevisionLevelList', {
+                  label: 'Revision Level List'
                 }),
-                PropertyPaneTextField('DepartmentList',{
-                  label:'Department List'
+                PropertyPaneTextField('projectInformationListName', {
+                  label: 'projectInformationListName'
                 }),
               ]
             }

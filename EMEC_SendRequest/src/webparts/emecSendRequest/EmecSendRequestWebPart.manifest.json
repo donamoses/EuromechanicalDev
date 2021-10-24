@@ -22,10 +22,10 @@
     "officeFabricIconFontName": "Page",
     "properties": {
       "description": "EMEC_SendRequest",
-      "notificationPreference":"Notification Preference Settings",
+      "notificationPreference":"NotificationPreferenceSettings",
       "emailNotification":"Email Nofication Settings",
       "hubUrl":"https://ccsdev01.sharepoint.com/sites/emechub/",
-      "userMessageSettings":"User Message Settings",
+      "userMessageSettings":"UserMessageSettings",
       "WorkflowHeaderList":"WorkflowHeader",
       "DocumentIndexList":"DocumentIndex",
       "WorkflowDetailsList":"WorkflowDetails",
@@ -33,14 +33,17 @@
       "PublishedDocument":"PublishedDocuments",
       "DocumentRevisionLogList":"DocumentRevisionLog",
       "TransmittalCodeSettingsList":"TransmittalCodeSettings",
-      "WorkflowTasksList":"Workflow Tasks",
+      "WorkflowTasksList":"WorkflowTasks",
       "RevisionLevelList":"RevisionLevel",
-      "TaskDelegationSettings":"Task Delegation Settings",
+      "TaskDelegationSettings":"TaskDelegationSettings",
       "RevisionHistoryPage":"RevisionHistory",
       "DocumentApprovalPage":"DocumentApproval",
       "DocumentReviewPage":"DocumentReview",
-      "AccessGroups":"Permission Matrix Settings",
-      "DepartmentList":"Department"
+      "AccessGroups":"PermissionMatrixSettings",
+      "DepartmentList":"Department",
+      "AccessGroupDetailsList":"AccessGroupDetails",
+      "hubsite":"emechub",
+      "projectInformationListName":"ProjectInformation"
 
     }
   }]

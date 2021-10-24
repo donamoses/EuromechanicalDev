@@ -26,10 +26,10 @@ export interface IMessage {
   message: string;
 }
 export interface IEmecApprovalWpState {
-  Requester: any;
-  RequesterComments: any;
-  DCCComments: any;
-  hideproject: boolean;
+  requester: any;
+  requesterComments: any;
+  dccComments: any;
+  hideProject: boolean;
   publishOptionKey: string;
   publishOption: string;
   status: string;
@@ -42,10 +42,10 @@ export interface IEmecApprovalWpState {
   ownerName: string;
   ownerEmail: string;
   dueDate: any;
-  RequesterName: string;
+  requesterName: string;
   requesterEmail: string;
   requestedDate: any;
-  RequesterComment: string;
+  requesterComment: string;
   linkToDoc: any;
   reviewerData: any[];
   access: string;
@@ -53,23 +53,23 @@ export interface IEmecApprovalWpState {
   hidepublish: boolean;
   statusMessage: IMessage;
   comments: string;
-  CriticalDocument: any;
-  ApproverName: string;
+  criticalDocument: any;
+  approverName: string;
   cancelConfirmMsg: string;
   confirmDialog: boolean;
   savedisable: boolean;
-  TaskID: any;
+  taskID: any;
   dccreviewerData: any[];
-  RevisionLevel: any;
-  AcceptanceCodearray: any[];
-  AcceptanceCode: any;
+  revisionLevel: any;
+  acceptanceCodearray: any[];
+  acceptanceCode: any;
   hideacceptance: boolean;
-  ExternalDocument: any;
+  externalDocument: any;
   hidetransmittalrevision: boolean;
   publishcheck: any;
-  TransmittalRevision: any;
-  ProjectName: any;
-  ProjectNumber: any;
+  transmittalRevision: any;
+  projectName: any;
+  projectNumber: any;
 }
 const Desktop = ({ children }) => {
 
@@ -98,12 +98,12 @@ export default class EmecApprovalWp extends React.Component<IEmecApprovalWpProps
     super(props);
     this.state = {
       publishOptionKey: "",
-      Requester: "",
+      requester: "",
       linkToDoc: "",
-      RequesterComments: "",
+      requesterComments: "",
       dueDate: "",
-      DCCComments: "",
-      hideproject: true,
+      dccComments: "",
+      hideProject: true,
       publishOption: "",
       status: "",
       statusKey: "",
@@ -114,10 +114,10 @@ export default class EmecApprovalWp extends React.Component<IEmecApprovalWpProps
       revision: "",
       ownerName: "",
       ownerEmail: "",
-      RequesterName: "",
+      requesterName: "",
       requesterEmail: "",
       requestedDate: "",
-      RequesterComment: "",
+      requesterComment: "",
       reviewerData: [],
       access: "none",
       accessDeniedMsgBar: "none",
@@ -128,60 +128,62 @@ export default class EmecApprovalWp extends React.Component<IEmecApprovalWpProps
         messageType: 90000,
       },
       comments: "",
-      CriticalDocument: "",
-      ApproverName: "",
+      criticalDocument: "",
+      approverName: "",
       cancelConfirmMsg: "none",
       confirmDialog: true,
       savedisable: false,
-      TaskID: "",
+      taskID: "",
       dccreviewerData: [],
-      RevisionLevel: "",
-      AcceptanceCodearray: [],
-      AcceptanceCode: "",
+      revisionLevel: "",
+      acceptanceCodearray: [],
+      acceptanceCode: "",
       hideacceptance: true,
-      ExternalDocument: "",
+      externalDocument: "",
       hidetransmittalrevision: true,
-      TransmittalRevision: "",
+      transmittalRevision: "",
       publishcheck: "",
-      ProjectName: "",
-      ProjectNumber: ""
+      projectName: "",
+      projectNumber: ""
     };
 
-    this.queryParamGetting = this.queryParamGetting.bind(this);
-    this.accessGroups = this.accessGroups.bind(this);
+    this._queryParamGetting = this._queryParamGetting.bind(this);
+    this._accessGroups = this._accessGroups.bind(this);
     this._openRevisionHistory = this._openRevisionHistory.bind(this);
-    this.BindApprovalForm = this.BindApprovalForm.bind(this);
+    this._bindApprovalForm = this._bindApprovalForm.bind(this);
+    this._project = this._project.bind(this);
     this._drpdwnPublishFormat = this._drpdwnPublishFormat.bind(this);
     this._status = this._status.bind(this);
-    this._commentschange = this._commentschange.bind(this);
-    this._SaveasDraft = this._SaveasDraft.bind(this);
+    this._commentsChange = this._commentsChange.bind(this);
+    this._saveAsDraft = this._saveAsDraft.bind(this);
     this._docSave = this._docSave.bind(this);
     this._publish = this._publish.bind(this);
-    this._returndoc = this._returndoc.bind(this);
-    this._sendmail = this._sendmail.bind(this);
+    this._returnDoc = this._returnDoc.bind(this);
+    this._sendMail = this._sendMail.bind(this);
     this._onCancel = this._onCancel.bind(this);
-    this.AcceptanceChanged = this.AcceptanceChanged.bind(this);
-    this._revisioncoding = this._revisioncoding.bind(this);
-    this.publishupdate = this.publishupdate.bind(this);
+    this._acceptanceChanged = this._acceptanceChanged.bind(this);
+    this._revisionCoding = this._revisionCoding.bind(this);
+    this._publishUpdate = this._publishUpdate.bind(this);
   }
   private workflowHeaderID;
   private documentIndexID;
   private sourceDocumentID;
   private workflowDetailID;
-  private Reciever;
-  private CurrentEmail;
+  private reciever;
+  private currentEmail;
   private reqWeb = Web(this.props.hubUrl);
   private documentApprovedSuccess;
   private documentSavedAsDraft;
   private documentRejectSuccess;
   private documentReturnSuccess;
   private today;
-  private RevisionLogId;
+  private revisionLogId;
   private currentrevision;
-  private InvalidApprovalLink;
-  private InvalidUser;
-  private Status = "";
-  private RedirectUrl = this.props.siteUrl + this.props.RedirectUrl;
+  private invalidApprovalLink;
+  private invalidUser;
+  private status = "";
+  private redirectUrl = this.props.siteUrl + this.props.redirectUrl;
+  private valid;
   // Validator
   public componentWillMount = () => {
     this.validator = new SimpleReactValidator({
@@ -194,42 +196,47 @@ export default class EmecApprovalWp extends React.Component<IEmecApprovalWpProps
   //Page Load
   public async componentDidMount() {
     // Get User Messages
-    await this.userMessageSettings();
+    await this._userMessageSettings();
     //Get Current User
     const user = await sp.web.currentUser.get();
     let userEmail = user.Email;
-    this.CurrentEmail = userEmail;
+    this.currentEmail = userEmail;
     //Get Today
     this.today = new Date();
     //Get Parameter from URL
-    this.queryParamGetting();
+    await this._queryParamGetting();
      //Get Approver
-     const HeaderItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).select("Approver/ID,Approver/EMail,DocumentIndexID").expand("Approver").get();
-     let ApproverEmail = HeaderItem.Approver.EMail;
+     const HeaderItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowHeaderList).items.getById(this.workflowHeaderID).select("Approver/ID,Approver/EMail,DocumentIndexID").expand("Approver").get();
+     let approverEmail = HeaderItem.Approver.EMail;
      this.documentIndexID = HeaderItem.DocumentIndexID;
     
-    //Get Access
-    this.accessGroups();
-   
-    //Check Current User is approver
-    if (userEmail == ApproverEmail) {
+    //  if(this.valid == "ok"){
+    //   //Get Access
+    //   await  this._accessGroups();
+    // }
+    // else if(this.valid == "Validok"){
+       //Check Current User is approver
+    if (userEmail == approverEmail) {
       this.setState({ access: "", accessDeniedMsgBar: "none", });
       if (this.props.project) {
-        this.setState({ hideproject: false });
-        await this.project();
+        this.setState({ hideProject: false });
+        await this._project();
       }
-      await this.BindApprovalForm();
+      await this._bindApprovalForm();
     }
     else {
       this.setState({
         access: "none",
         accessDeniedMsgBar: "",
-        statusMessage: { isShowMessage: true, message: this.InvalidUser, messageType: 4 }
+        statusMessage: { isShowMessage: true, message: this.invalidUser, messageType: 4 }
       });
     }
+    // }
+   
+  
   }
   //Get Parameter from URL
-  private queryParamGetting() {
+  private _queryParamGetting() {
     //Query getting...
     let params = new URLSearchParams(window.location.search);
     let headerid = params.get('hid');
@@ -237,45 +244,52 @@ export default class EmecApprovalWp extends React.Component<IEmecApprovalWpProps
     if (headerid != "" && headerid != null && detailid != "" && detailid != null) {
       this.workflowHeaderID = parseInt(headerid);
       this.workflowDetailID = parseInt(detailid);
+      this.valid = "ok";
     }
     else {
       this.setState({
         accessDeniedMsgBar: "",
-        statusMessage: { isShowMessage: true, message: this.InvalidApprovalLink, messageType: 1 },
+        statusMessage: { isShowMessage: true, message: this.invalidApprovalLink, messageType: 1 },
       });
       setTimeout(() => {
         this.setState({ accessDeniedMsgBar: 'none', });
-        window.location.replace(this.RedirectUrl);
-      }, 5000);
+        window.location.replace(this.redirectUrl);
+      }, 10000);
     }
   }
   //Get Access Groups
-  private async accessGroups(){
-    let AccessGroup=[];
+  private async _accessGroups(){
+    let accessGroup=[];
     let ok = "No";
     if(this.props.project){
-      AccessGroup= await this.reqWeb.lists.getByTitle(this.props.AccessGroups).items.select("AccessGroups,AccessFields").filter("Title eq 'Project_SendApprovalWF'").get();
+      accessGroup= await this.reqWeb.getList("/sites/"+this.props.hubsite+"/Lists/"+this.props.PermissionMatrixSettings).items.select("AccessGroups,AccessFields").filter("Title eq 'QDMS_SendApprovalWF'").get();
     }
     else{
-      AccessGroup= await this.reqWeb.lists.getByTitle(this.props.AccessGroups).items.select("AccessGroups,AccessFields").filter("Title eq 'QDMS_SendApprovalWF'").get();
+      accessGroup= await this.reqWeb.getList("/sites/"+this.props.hubsite+"/Lists/"+this.props.PermissionMatrixSettings).items.select("AccessGroups,AccessFields").filter("Title eq 'QDMS_SendApprovalWF'").get();
     }
 
-let AccessGroupItems:any[]= AccessGroup[0].AccessGroups.split(',');
-console.log(AccessGroupItems);
-const DocumentIndexItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentIndexList).items.getById(this.documentIndexID).select("DepartmentID").get();
-console.log(DocumentIndexItem);
-let deptid = parseInt(DocumentIndexItem.DepartmentID);
-const DepartmentItem: any = await this.reqWeb.lists.getByTitle(this.props.DepartmentList).items.getById(deptid).select("AccessGroups").get();
-console.log(DepartmentItem.AccessGroups);
-var result = AccessGroupItems.indexOf(DepartmentItem.AccessGroups);
-console.log(result);
+let accessGroupItems:any[]= accessGroup[0].AccessGroups.split(',');
+console.log(accessGroupItems);
+const documentIndexItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.documentIndexList).items.getById(this.documentIndexID).select("DepartmentID").get();
+console.log(documentIndexItem);
+let deptid = parseInt(documentIndexItem.DepartmentID);
+const departmentItem: any = await this.reqWeb.getList("/sites/"+this.props.hubsite+"/Lists/"+this.props.departmentList).items.filter('Title eq '+deptid).select("AccessGroups").get();
+let AG =departmentItem[0].AccessGroups;
+const accessGroupItem: any = await this.reqWeb.getList("/sites/"+this.props.hubsite+"/Lists/"+this.props.accessGroupDetailsList).items.get();
+let accessGroupID;
+console.log(accessGroupItem.length);
+for (let a = 0;a<accessGroupItem.length;a++){
+  if(accessGroupItem[a].Title == AG){
+    accessGroupID = accessGroupItem[a].GroupID;
+  }
+}
 const postURL = "https://prod-05.uaecentral.logic.azure.com:443/workflows/60862323b80c44369d5bc091f5490bfa/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=QzrPWl7wN5e6k873vy-X9qNeBk0VJojo1M7CzwslVsA";
 
 const requestHeaders: Headers = new Headers();
 requestHeaders.append("Content-type", "application/json");
 const body: string = JSON.stringify({
-  'Groupid':'4e798fae-1571-4352-9ea5-67ba554e729c',
-  'CurrentUserMail':this.CurrentEmail
+  'Groupid':accessGroupID,
+  'CurrentUserMail':this.currentEmail
   
 });
 const postOptions: IHttpClientOptions = {
@@ -290,20 +304,28 @@ responseText = JSON.stringify(responseJSON);
 if (response.ok) {
   
   console.log(responseJSON.ValidUser);
-  this.setState({
-    access: "none",
-    accessDeniedMsgBar: "",
-    statusMessage: { isShowMessage: true, message: this.InvalidUser, messageType: 4 }
-  });
+  if(responseJSON.ValidUser == "Yes"){
+    this.valid = "Validok";
+  }
+  else{
+//  this.setState({
+//     access: "none",
+//     accessDeniedMsgBar: "",
+//     statusMessage: { isShowMessage: true, message: this.invalidUser, messageType: 4 }
+//   });
+//   setTimeout(() => {
+//     this.setState({ accessDeniedMsgBar: 'none', });
+//     window.location.replace(this.redirectUrl);
+//   }, 10000);
+  }
+ 
   
 }
 else {
 }
-
-
-  }
+}
   //Bind Approval Form
-  public async BindApprovalForm() {
+  public async _bindApprovalForm() {
 
     let ApproverId;
     let ApproverName;
@@ -327,7 +349,7 @@ else {
     let PublishOption;
 
     //Get Header Item
-    const HeaderItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).select("Requester/ID,Requester/Title,Requester/EMail,Approver/ID,Approver/Title,SourceDocumentID,DocumentIndexID,RequestedDate,RequesterComment,DueDate,PublishFormat").expand("Requester,Approver").get();
+    const HeaderItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowHeaderList).items.getById(this.workflowHeaderID).select("Requester/ID,Requester/Title,Requester/EMail,Approver/ID,Approver/Title,SourceDocumentID,DocumentIndexID,RequestedDate,RequesterComment,DueDate,PublishFormat").expand("Requester,Approver").get();
     ApproverId = HeaderItem.Approver.ID;
     ApproverName = HeaderItem.Approver.Title;
     this.sourceDocumentID = HeaderItem.SourceDocumentID;
@@ -335,15 +357,15 @@ else {
     RequesterName = HeaderItem.Requester.Title;
     RequesterEmail = HeaderItem.Requester.EMail;
     if(HeaderItem.RequestedDate != null){
-    var reqdate = new Date(HeaderItem.RequestedDate.toString()).toLocaleString();
+    var reqdate = new Date(HeaderItem.RequestedDate);
     RequestedDate = moment(reqdate).format('DD-MMM-YYYY HH:mm');
     }
     RequesterComment = HeaderItem.RequesterComment;
-    var duedate = new Date(HeaderItem.DueDate.toString()).toLocaleString();
+    var duedate = new Date(HeaderItem.DueDate);
     DueDate = moment(duedate).format('DD-MMM-YYYY HH:mm');
     PublishOption = HeaderItem.PublishFormat;
     //Get Document Index
-    const DocumentIndexItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentIndexList).items.getById(this.documentIndexID).select("DocumentID,DocumentName,Owner/Title,Owner/EMail,Revision,SourceDocument,CriticalDocument").expand("Owner").get();
+    const DocumentIndexItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.documentIndexList).items.getById(this.documentIndexID).select("DocumentID,DocumentName,Owner/Title,Owner/EMail,Revision,SourceDocument,CriticalDocument").expand("Owner").get();
     console.log(DocumentIndexItem);
     DocumentID = DocumentIndexItem.DocumentID;
     DocumentName = DocumentIndexItem.DocumentName;
@@ -353,10 +375,10 @@ else {
     LinkToDocument = DocumentIndexItem.SourceDocument.Url;
     CriticalDocument = DocumentIndexItem.CriticalDocument;
     //Get Workflow Details
-    const DetailItem: any[] = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowDetailsList).items.filter("HeaderID eq " + this.workflowHeaderID).select("ID,Workflow,ResponseDate,ResponsibleComment,ResponseStatus,Responsible/Title,TaskID").expand("Responsible").get();
+    const DetailItem: any[] = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowDetailsList).items.filter("HeaderID eq " + this.workflowHeaderID).select("ID,Workflow,ResponseDate,ResponsibleComment,ResponseStatus,Responsible/Title,TaskID").expand("Responsible").get();
     for (var k in DetailItem) {
       if (DetailItem[k].Workflow == 'Review') {
-        var rewdate = new Date(DetailItem[k].ResponseDate.toString()).toLocaleString();
+        var rewdate = new Date(DetailItem[k].ResponseDate);
         ReviewDate = moment(rewdate).format('DD-MMM-YYYY HH:mm');
         ReviewerArr.push({
           ResponseDate: ReviewDate,
@@ -387,25 +409,26 @@ else {
       ownerName: OwnerName,
       ownerEmail: OwnerEmail,
       dueDate: DueDate,
-      RequesterName: RequesterName,
+      requesterName: RequesterName,
       requesterEmail: RequesterEmail,
       requestedDate: RequestedDate,
-      RequesterComment: RequesterComment,
+      requesterComment: RequesterComment,
       reviewerData: ReviewerArr,
       comments: ApproverComment,
-      CriticalDocument: CriticalDocument,
-      ApproverName: ApproverName,
-      TaskID: TaskID,
+      criticalDocument: CriticalDocument,
+      approverName: ApproverName,
+      taskID: TaskID,
       statusKey: Status,
       publishOptionKey: PublishOption
 
     });
-    await this.userMessageSettings();
+    await this._userMessageSettings();
   }
 
   //Messages
-  private async userMessageSettings() {
-    const userMessageSettings: any[] = await this.reqWeb.lists.getByTitle(this.props.userMessageSettings).items.select("Title,Message").filter("PageName eq 'Approve'").get();
+  private async _userMessageSettings() {
+    
+    const userMessageSettings: any[] = await this.reqWeb.getList("/sites/"+this.props.hubsite+"/Lists/"+this.props.userMessageSettings).items.select("Title,Message").filter("PageName eq 'Approve'").get();
     console.log(userMessageSettings);
     for (var i in userMessageSettings) {
       if (userMessageSettings[i].Title == "ApproveSubmitSuccess") {
@@ -416,10 +439,10 @@ else {
         this.documentSavedAsDraft = userMessageSettings[i].Message;
       }
       else if (userMessageSettings[i].Title == "InvalidApprovalLink") {
-        this.InvalidApprovalLink = userMessageSettings[i].Message;
+        this.invalidApprovalLink = userMessageSettings[i].Message;
       }
       else if (userMessageSettings[i].Title == "InvalidApproverUser") {
-        this.InvalidUser = userMessageSettings[i].Message;
+        this.invalidUser = userMessageSettings[i].Message;
       }
       else if (userMessageSettings[i].Title == "ApproveRejectSuccess") {
         var rejectmsg = userMessageSettings[i].Message;
@@ -432,51 +455,56 @@ else {
     }
 
   }
-  public async project() {
+  public async _project() {
     let ReviewDate;
     let DCCReviewerArr: any[] = [];
     let Acceptancearray = [];
     let sorted_Acceptance = [];
     let ProjectName;
     let ProjectNumber;
-    const HeaderItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).select("RevisionLevel/Id,RevisionLevel/Title,DocumentControllerId,RevisionCodingId,ApproveInSameRevision,DocumentIndexID,AcceptanceCode/ID").expand("RevisionLevel,AcceptanceCode").get();
+    const HeaderItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowHeaderList).items.getById(this.workflowHeaderID).select("RevisionLevel/Id,RevisionLevel/Title,DocumentControllerId,RevisionCodingId,ApproveInSameRevision,DocumentIndexID,AcceptanceCodeId").expand("RevisionLevel").get();
     let DCC = HeaderItem.DocumentControllerId;
     let RevisionLevel = HeaderItem.RevisionLevel.Title;
     let DocumentIndexId = HeaderItem.DocumentIndexID;
-    let AcceptanceCode = HeaderItem.AcceptanceCode.ID;
-    const DocumentIndexItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentIndexList).items.getById(DocumentIndexId).select("ExternalDocument,TransmittalDocument,TransmittalRevision").get();
+    let AcceptanceCode = HeaderItem.AcceptanceCodeId;
+    const DocumentIndexItem: any = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.documentIndexList).items.getById(DocumentIndexId).select("ExternalDocument,TransmittalDocument,TransmittalRevision").get();
     let ExternalDocument = DocumentIndexItem.ExternalDocument;
     let TransmittalDocument = DocumentIndexItem.TransmittalDocument;
     let TransmittalRevision = DocumentIndexItem.TransmittalRevision;
 
-    const ProjectInformation: any[] = await sp.web.getList(this.props.siteUrl + "/Lists/ProjectInformation").items.get();
-    ProjectName = ProjectInformation[0].Title;
-    ProjectNumber = ProjectInformation[1].Title;
-    // for(let pro=0;pro<=ProjectInformation.length;pro++){
-    //   if(ProjectInformation[pro].Key == "ProjectName"){
-    //     ProjectName = ProjectInformation[0].Title;
-    //   }
-    //   else if(ProjectInformation[pro].Key == "ProjectNumber"){
-    //     ProjectNumber = ProjectInformation[1].Title;
-    //   }
-    // }
+    const projectInformation  = await  sp.web.getList(this.props.siteUrl + "/Lists/"+this.props.projectInformationListName).items.get();
+    console.log("projectInformation",projectInformation);
+    if(projectInformation.length>0){
+      for(var k in projectInformation){             
+    if(projectInformation[k].Key == "ProjectName"){
+      this.setState({
+        projectName:projectInformation[k].Title,
+      });
+    } 
+    if(projectInformation[k].Key == "ProjectNumber"){
+      this.setState({
+      projectNumber:projectInformation[k].Title,
+      });
+    }
+      }
+    }
     if (DCC != null) {
-      const DetailItem: any[] = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowDetailsList).items.filter("HeaderID eq " + this.workflowHeaderID).select("ID,Workflow,ResponseDate,ResponsibleComment,ResponseStatus,Responsible/Title,TaskID").expand("Responsible").get();
-      for (var k in DetailItem) {
-        if (DetailItem[k].Workflow == 'DCC Review') {
-          var rewdate = new Date(DetailItem[k].ResponseDate.toString()).toLocaleString();
+      const DetailItem: any[] = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowDetailsList).items.filter("HeaderID eq " + this.workflowHeaderID).select("ID,Workflow,ResponseDate,ResponsibleComment,ResponseStatus,Responsible/Title,TaskID").expand("Responsible").get();
+      for (var l in DetailItem) {
+        if (DetailItem[l].Workflow == 'DCC Review') {
+          var rewdate = new Date(DetailItem[l].ResponseDate.toString()).toLocaleString();
           ReviewDate = moment(rewdate).format('DD-MMM-YYYY HH:mm');
           DCCReviewerArr.push({
             ResponseDate: ReviewDate,
-            Reviewer: DetailItem[k].Responsible.Title,
-            DCCResponsibleComment: DetailItem[k].ResponsibleComment
+            Reviewer: DetailItem[l].Responsible.Title,
+            DCCResponsibleComment: DetailItem[l].ResponsibleComment
           });
         }
       }
     }
     if (ExternalDocument == true) {
       this.setState({ hideacceptance: false });
-      const transmittalcodeitems: any[] = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.TransmittalCodeSettingsList).items.getAll();
+      const transmittalcodeitems: any[] = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.transmittalCodeSettingsList).items.getAll();
 
       for (let i = 0; i < transmittalcodeitems.length; i++) {
         if (transmittalcodeitems[i].AcceptanceCode == true) {
@@ -496,13 +524,11 @@ else {
     }
     this.setState({
       dccreviewerData: DCCReviewerArr,
-      RevisionLevel: RevisionLevel,
-      AcceptanceCodearray: sorted_Acceptance,
-      ExternalDocument: ExternalDocument,
-      TransmittalRevision: TransmittalRevision,
-      ProjectName: ProjectName,
-      ProjectNumber: ProjectNumber,
-      AcceptanceCode: AcceptanceCode
+      revisionLevel: RevisionLevel,
+      acceptanceCodearray: sorted_Acceptance,
+      externalDocument: ExternalDocument,
+      transmittalRevision: TransmittalRevision,
+      acceptanceCode: AcceptanceCode
     });
   }
   //Revision History Url
@@ -512,7 +538,7 @@ else {
   private _onPublishTransmittal = (ev: React.FormEvent<HTMLInputElement>, isChecked?: boolean) => {
     if (isChecked == true) {
       this.setState({ publishcheck: isChecked });
-      this._revisioncoding();
+      this._revisionCoding();
     }
   }
 
@@ -535,17 +561,17 @@ else {
     //console.log(option.key);
     this.setState({ publishOptionKey: option.key, publishOption: option.text, savedisable: false });
   }
-  public async AcceptanceChanged(option: { key: any; text: any }) {
+  public async _acceptanceChanged(option: { key: any; text: any }) {
     console.log(option.key);
-    this.setState({ AcceptanceCode: option.key });
+    this.setState({ acceptanceCode: option.key });
   }
   //Comment Change
-  public _commentschange = (ev: React.FormEvent<HTMLInputElement>, comments?: any) => {
+  public _commentsChange = (ev: React.FormEvent<HTMLInputElement>, comments?: any) => {
     this.setState({ comments: comments, savedisable: false });
   }
   //Save as Draft
-  public _SaveasDraft = async () => {
-    await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowDetailsList).items.getById(this.workflowDetailID).update({
+  public _saveAsDraft = async () => {
+    await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowDetailsList).items.getById(this.workflowDetailID).update({
 
       ResponsibleComment: this.state.comments,
 
@@ -558,8 +584,8 @@ else {
   private _docSave = async () => {
     this.setState({ savedisable: true });
 
-    sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentRevisionLogList).items.filter("WorkflowID eq '" + this.workflowHeaderID + "' and (Workflow eq 'Approve')").get().then(ifyes => {
-      this.RevisionLogId = ifyes[0].ID;
+    sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.documentRevisionLogList).items.filter("WorkflowID eq '" + this.workflowHeaderID + "' and (Workflow eq 'Approve')").get().then(ifyes => {
+      this.revisionLogId = ifyes[0].ID;
     });
 
     if (this.state.hidepublish == false) {
@@ -567,11 +593,11 @@ else {
         this.validator.hideMessages();
         this.setState({ approveDocument: "" });
         setTimeout(() => this.setState({ approveDocument: 'none', }), 3000);
-        await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).update({
+        await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowHeaderList).items.getById(this.workflowHeaderID).update({
           PublishFormat: this.state.publishOption,
 
         });
-        await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowDetailsList).items.getById(this.workflowDetailID).update({
+        await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowDetailsList).items.getById(this.workflowDetailID).update({
           ResponsibleComment: this.state.comments,
           ResponseStatus: "Published",
           ResponseDate: this.today,
@@ -591,13 +617,13 @@ else {
         this.setState({ approveDocument: "" });
         setTimeout(() => this.setState({ approveDocument: 'none' }), 3000);
 
-        await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowDetailsList).items.getById(this.workflowDetailID).update({
+        await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowDetailsList).items.getById(this.workflowDetailID).update({
           ResponsibleComment: this.state.comments,
           ResponseStatus: this.state.status,
           ResponseDate: this.today
 
         });
-        this._returndoc();
+        this._returnDoc();
 
       }
       else {
@@ -608,7 +634,7 @@ else {
 
   }
   
-  public _revisioncoding = async () => {
+  public _revisionCoding = async () => {
 
     if (this.props.project) {
       let revision = parseInt(this.state.revision);
@@ -623,7 +649,7 @@ else {
   }
   //Document Published
   protected async _publish(){
-    this._revisioncoding();
+    this._revisionCoding();
     const postURL = "https://prod-22.uaecentral.logic.azure.com:443/workflows/2fec0e6b5b3642a692a466951503751a/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=TXMLhWRMwxiaNOQ9HMGE5C_qsRBqhJ70uQx5ccEUgTE";
 
     const requestHeaders: Headers = new Headers();
@@ -632,12 +658,12 @@ else {
       'Status': 'Published',
       'PublishFormat': this.state.publishOption,
       'SourceDocumentID': this.sourceDocumentID,
-      'SiteURL': this.props.siteUrl,
+      'SiteURL': this.props.siteAddress,
       'DocumentName': this.state.documentName,
-      'PublishedDocumentLibrary': this.props.PublishedDocument,
+      'PublishedDocumentLibrary': this.props.publishedDocument,
       'Revision': this.currentrevision,
       'PublishedDate': this.today,
-      'SourceDocumentLibrary':this.props.SourceDocumentLibrary
+      'SourceDocumentLibrary':this.props.sourceDocumentLibrary
     });
     const postOptions: IHttpClientOptions = {
        headers: requestHeaders,
@@ -650,15 +676,15 @@ else {
      console.log(responseJSON);
     if (response.ok) {
       
-      this.publishupdate(responseJSON.PublishDocID);
+      this._publishUpdate(responseJSON.PublishDocID);
     }
     else {
     }
   }
-public async publishupdate(publishid){
-  let SD =  await sp.web.getList(this.props.siteUrl + "/" + this.props.SourceDocument).items.getById(this.sourceDocumentID).get();
+public async _publishUpdate(publishid){
+  let SD =  await sp.web.getList(this.props.siteUrl + "/" + this.props.sourceDocument).items.getById(this.sourceDocumentID).get();
 
-  await sp.web.getList(this.props.siteUrl + "/" + this.props.PublishedDocument).items.getById(publishid).update({
+  await sp.web.getList(this.props.siteUrl + "/" + this.props.publishedDocument).items.getById(publishid).update({
     DocumentID:this.state.documentID,
     DocumentName:this.state.documentName,
     DocumentIndexId:this.documentIndexID,
@@ -680,139 +706,139 @@ public async publishupdate(publishid){
     ReviewersId: { results: SD.ReviewersId },
   });
 
-if (this.state.hideproject == true) {
-                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentIndexList).items.getById(this.documentIndexID).update({
+if (this.state.hideProject == true) {
+                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.documentIndexList).items.getById(this.documentIndexID).update({
                   PublishFormat: this.state.publishOption,
                   WorkflowStatus: "Published",
                   Revision: this.currentrevision
                 });
           
-                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).update({
+                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowHeaderList).items.getById(this.workflowHeaderID).update({
                   ApprovedDate: this.today,
                   WorkflowStatus: "Published",
                   PublishFormat: this.state.publishOption,
                   Revision: this.currentrevision,
                 });
           
-                await sp.web.getList(this.props.siteUrl + "/" + this.props.SourceDocument).items.getById(this.sourceDocumentID).update({
+                await sp.web.getList(this.props.siteUrl + "/" + this.props.sourceDocument).items.getById(this.sourceDocumentID).update({
                   PublishFormat: this.state.publishOption,
                   WorkflowStatus: "Published",
                   Revision: this.currentrevision
                 });
               }
               else {
-                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentIndexList).items.getById(this.documentIndexID).update({
+                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.documentIndexList).items.getById(this.documentIndexID).update({
                   PublishFormat: this.state.publishOption,
                   WorkflowStatus: "Published",
                   Revision: this.currentrevision,
-                  AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
+                  AcceptanceCodeId: parseInt(this.state.acceptanceCode)
                 });
           
-                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).update({
+                await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowHeaderList).items.getById(this.workflowHeaderID).update({
                   ApprovedDate: this.today,
                   WorkflowStatus: "Published",
                   PublishFormat: this.state.publishOption,
                   Revision: this.currentrevision,
-                  AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
+                  AcceptanceCodeId: parseInt(this.state.acceptanceCode)
                 });
-                await sp.web.getList(this.props.siteUrl + "/" + this.props.SourceDocument).items.getById(this.sourceDocumentID).update({
+                await sp.web.getList(this.props.siteUrl + "/" + this.props.sourceDocument).items.getById(this.sourceDocumentID).update({
                   PublishFormat: this.state.publishOption,
                   WorkflowStatus: "Published",
                   Revision: this.currentrevision,
-                  AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
+                  AcceptanceCodeId: parseInt(this.state.acceptanceCode)
                 });
               }
-              this._sendmail(this.state.ownerEmail, "DocPublish", this.state.ownerName);
-              this._sendmail(this.state.requesterEmail, "DocPublish", this.state.RequesterName);
-              let a = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentRevisionLogList).items.getById(this.RevisionLogId).update({
+              this._sendMail(this.state.ownerEmail, "DocPublish", this.state.ownerName);
+              this._sendMail(this.state.requesterEmail, "DocPublish", this.state.requesterName);
+              let a = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.documentRevisionLogList).items.getById(this.revisionLogId).update({
                 Status: "Published"
               });
-              await this.reqWeb.lists.getByTitle(this.props.WorkflowTasksList).items.getById(parseInt(this.state.TaskID)).delete();
+              await this.reqWeb.getList("/sites/"+this.props.hubsite+"/Lists/"+this.props.workflowTasksList).items.getById(parseInt(this.state.taskID)).delete();
               setTimeout(() => {
                 this.setState({ statusMessage: { isShowMessage: true, message: this.documentApprovedSuccess, messageType: 4 } });
-                window.location.replace(this.RedirectUrl);
-              }, 5000);
+                window.location.replace(this.redirectUrl);
+              }, 10000);
 
 }
  
   //Document Return
-  public _returndoc = async () => {
+  public _returnDoc = async () => {
     let message;
     let logstatus;
-    if (this.state.status == "Rejected" && this.state.hideproject == false) {
-      await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentIndexList).items.getById(this.documentIndexID).update({
+    if (this.state.status == "Rejected" && this.state.hideProject == false) {
+      await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.documentIndexList).items.getById(this.documentIndexID).update({
         WorkflowStatus: this.state.status,
-        AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
+        AcceptanceCodeId: parseInt(this.state.acceptanceCode)
       });
 
-      await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).update({
+      await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowHeaderList).items.getById(this.workflowHeaderID).update({
         ApprovedDate: this.today,
         WorkflowStatus: this.state.status,
-        AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
+        AcceptanceCodeId: parseInt(this.state.acceptanceCode)
       });
 
-      await sp.web.getList(this.props.siteUrl + "/" + this.props.SourceDocument).items.getById(this.sourceDocumentID).update({
+      await sp.web.getList(this.props.siteUrl + "/" + this.props.sourceDocument).items.getById(this.sourceDocumentID).update({
         WorkflowStatus: this.state.status,
-        AcceptanceCodeId: parseInt(this.state.AcceptanceCode)
+        AcceptanceCodeId: parseInt(this.state.acceptanceCode)
       });
     }
     else {
-      await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentIndexList).items.getById(this.documentIndexID).update({
+      await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.documentIndexList).items.getById(this.documentIndexID).update({
         WorkflowStatus: this.state.status
       });
 
-      await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.WorkflowHeaderList).items.getById(this.workflowHeaderID).update({
+      await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.workflowHeaderList).items.getById(this.workflowHeaderID).update({
         ApprovedDate: this.today,
         WorkflowStatus: this.state.status
       });
 
-      await sp.web.getList(this.props.siteUrl + "/" + this.props.SourceDocument).items.getById(this.sourceDocumentID).update({
+      await sp.web.getList(this.props.siteUrl + "/" + this.props.sourceDocument).items.getById(this.sourceDocumentID).update({
         WorkflowStatus: this.state.status
       });
     }
     if (this.state.status == "Returned with comments") {
       message = this.documentReturnSuccess;
       logstatus = "Approval with Return with comments";
-      this._sendmail(this.state.ownerEmail, "DocReturn", this.state.ownerName);
-      this._sendmail(this.state.requesterEmail, "DocReturn", this.state.RequesterName);
+      this._sendMail(this.state.ownerEmail, "DocReturn", this.state.ownerName);
+      this._sendMail(this.state.requesterEmail, "DocReturn", this.state.requesterName);
 
     }
     else {
       message = this.documentRejectSuccess;
       logstatus = "Rejected";
-      this._sendmail(this.state.ownerEmail, "DocRejected", this.state.ownerName);
-      this._sendmail(this.state.requesterEmail, "DocRejected", this.state.RequesterName);
+      this._sendMail(this.state.ownerEmail, "DocRejected", this.state.ownerName);
+      this._sendMail(this.state.requesterEmail, "DocRejected", this.state.requesterName);
 
     }
 
-    let a = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.DocumentRevisionLogList).items.getById(this.RevisionLogId).update({
+    let a = await sp.web.getList(this.props.siteUrl + "/Lists/" + this.props.documentRevisionLogList).items.getById(this.revisionLogId).update({
       Status: logstatus
     });
-    await this.reqWeb.lists.getByTitle(this.props.WorkflowTasksList).items.getById(parseInt(this.state.TaskID)).delete();
+    await this.reqWeb.getList("/sites/"+this.props.hubsite+"/Lists/"+this.props.workflowTasksList).items.getById(parseInt(this.state.taskID)).delete();
     setTimeout(() => {
       this.setState({
         statusMessage: { isShowMessage: true, message: message, messageType: 4 }
       });
-      window.location.replace(this.RedirectUrl);
-    }, 5000);
+      window.location.replace(this.redirectUrl);
+    }, 10000);
   }
   //Send Mail
-  public _sendmail = async (emailuser, type, name) => {
+  public _sendMail = async (emailuser, type, name) => {
 
     let formatday = moment(this.today).format('DD/MMM/YYYY');
     let day = formatday.toString();
     let mailSend = "No";
     let Subject;
     let Body;
-    console.log(this.state.CriticalDocument);
+    console.log(this.state.criticalDocument);
 
-    const notificationPreference: any[] = await this.reqWeb.lists.getByTitle(this.props.notificationPreference).items.filter("EmailUser/EMail eq '" + emailuser + "'").select("Preference").get();
+    const notificationPreference: any[] = await this.reqWeb.getList("/sites/"+this.props.hubsite+"/Lists/"+this.props.notificationPreference).items.filter("EmailUser/EMail eq '" + emailuser + "'").select("Preference").get();
     console.log(notificationPreference[0].Preference);
     if(notificationPreference.length>0){
       if (notificationPreference[0].Preference == "Send all emails") {
         mailSend = "Yes";
       }
-      else if (notificationPreference[0].Preference == "Send mail for critical document" && this.state.CriticalDocument == true) {
+      else if (notificationPreference[0].Preference == "Send mail for critical document" && this.state.criticalDocument == true) {
         mailSend = "Yes";
   
       }
@@ -820,12 +846,12 @@ if (this.state.hideproject == true) {
         mailSend = "No";
       } 
     }
-    else if(this.state.CriticalDocument == true){        
+    else if(this.state.criticalDocument == true){        
         //console.log("Send mail for critical document");
         mailSend="Yes";         
     } 
     if (mailSend == "Yes") {
-      const emailNotification: any[] = await this.reqWeb.lists.getByTitle(this.props.emailNotification).items.get();
+      const emailNotification: any[] = await this.reqWeb.getList("/sites/"+this.props.hubsite+"/Lists/"+this.props.emailNotification).items.get();
       console.log(emailNotification);
       for (var k in emailNotification) {
         if (emailNotification[k].Title == type) {
@@ -837,7 +863,7 @@ if (this.state.hideproject == true) {
       let replacedSubject = replaceString(Subject, '[DocumentName]', this.state.documentName);
       let replaceRequester = replaceString(Body, '[Sir/Madam]', name);
       let replaceDate = replaceString(replaceRequester, '[PublishedDate]', day);
-      let replaceApprover = replaceString(replaceDate, '[Approver]', this.state.ApproverName);
+      let replaceApprover = replaceString(replaceDate, '[Approver]', this.state.approverName);
       let replaceBody = replaceString(replaceApprover, '[DocumentName]', this.state.documentName);
 
       //Create Body for Email  
@@ -887,7 +913,7 @@ if (this.state.hideproject == true) {
       confirmDialog: true,
     });
     this.validator.hideMessages();
-    window.location.replace(this.RedirectUrl);
+    window.location.replace(this.redirectUrl);
   }
   //Not Cancel
   private _confirmNoCancel = () => {
@@ -900,7 +926,7 @@ if (this.state.hideproject == true) {
   }
   //access denied msgbar close button click
   private _closeButton = () => {
-    window.location.replace(this.RedirectUrl);
+    window.location.replace(this.redirectUrl);
   }
 
   //For dialog box of cancel
@@ -953,28 +979,28 @@ if (this.state.hideproject == true) {
 
             <div >
               <Label >Document : <a href={this.state.linkToDoc}>{this.state.documentName}</a></Label>
-              <div hidden={this.state.hideproject}>
+              <div hidden={this.state.hideProject}>
                 <div className={styles.flex} >
-                  <div className={styles.width}><Label >Project Name : {this.state.ProjectName}</Label></div>
-                  <div ><Label>Project Number : {this.state.ProjectNumber} </Label></div>
+                  <div className={styles.width}><Label >Project Name : {this.state.projectName}</Label></div>
+                  <div ><Label>Project Number : {this.state.projectNumber} </Label></div>
                 </div></div>
               <div className={styles.flex}>
                 <div className={styles.width}><Label >Revision : {this.state.revision}</Label></div>
-                <div hidden={this.state.hideproject}><Label>Revision Level : {this.state.RevisionLevel} </Label></div>
+                <div hidden={this.state.hideProject}><Label>Revision Level : {this.state.revisionLevel} </Label></div>
               </div>
               <div className={styles.flex}>
                 <div className={styles.width}><Label >Owner : {this.state.ownerName} </Label></div>
                 <div><Label >Due Date : {this.state.dueDate}</Label></div>
               </div>
               <div className={styles.flex}>
-                <div className={styles.width}><Label>Requester : {this.state.RequesterName} </Label></div>
+                <div className={styles.width}><Label>Requester : {this.state.requesterName} </Label></div>
                 <div><Label >Requested Date : {this.state.requestedDate} </Label></div>
               </div>
               <div className={styles.flex}>
-                <div><Label> Requester Comment : </Label>{ReactHtmlParser(this.state.RequesterComment)}</div>
+                <div><Label> Requester Comment : </Label>{ReactHtmlParser(this.state.requesterComment)}</div>
               </div>
               <br></br>
-              <div hidden={this.state.hideproject} >
+              <div hidden={this.state.hideProject} >
 
                 <div style={{ display: (this.state.dccreviewerData.length == 0 ? 'none' : 'block') }}>
                   <table className={styles.tableClass}   >
@@ -1021,9 +1047,9 @@ if (this.state.hideproject == true) {
             </div>
             <div >
               <div className={styles.mt}>
-                <div hidden={this.state.hideproject}>
+                <div hidden={this.state.hideProject}>
                   <div className={styles.flex} >
-                    <div className={styles.width}><Label >Transmittal Revision : {this.state.TransmittalRevision}</Label></div>
+                    <div className={styles.width}><Label >Transmittal Revision : {this.state.transmittalRevision}</Label></div>
                     <div ><Checkbox label="Publish For Transmittal " onChange={this._onPublishTransmittal} /></div>
                   </div>
                 </div>
@@ -1049,17 +1075,17 @@ if (this.state.hideproject == true) {
                   required />
                 <div style={{ color: "#dc3545" }}>{this.validator.message("publishFormat", this.state.publishOptionKey, "required")}{" "}</div>
               </div>
-              <div className={styles.mt} hidden={this.state.hideproject} >
+              <div className={styles.mt} hidden={this.state.hideProject} >
                 <div hidden={this.state.hideacceptance}>
                   <Dropdown id="transmittalcode" required={true}
                     placeholder="Select an option"
                     label="Acceptance Code"
-                    options={this.state.AcceptanceCodearray}
-                    onChanged={this.AcceptanceChanged}
-                    selectedKey={this.state.AcceptanceCode}
+                    options={this.state.acceptanceCodearray}
+                    onChanged={this._acceptanceChanged}
+                    selectedKey={this.state.acceptanceCode}
                   /></div></div>
               <div className={styles.mt}>
-                < TextField label="Comments" id="comments" value={this.state.comments} onChange={this._commentschange} multiline required autoAdjustHeight></TextField></div>
+                < TextField label="Comments" id="comments" value={this.state.comments} onChange={this._commentsChange} multiline required autoAdjustHeight></TextField></div>
               <div style={{ color: "#dc3545" }}>{this.validator.message("comments", this.state.comments, "required")}{" "}</div>
               <DialogFooter>
 
@@ -1067,7 +1093,7 @@ if (this.state.hideproject == true) {
                   <div style={{ fontStyle: "italic", fontSize: "12px" }}><span style={{ color: "red", fontSize: "23px" }}>*</span>fields are mandatory </div>
                 </div>
                 <div className={styles.rgtalign} >
-                  <DefaultButton id="b2" className={styles.btn} onClick={this._SaveasDraft}>Save as draft</DefaultButton >
+                  <DefaultButton id="b2" className={styles.btn} onClick={this._saveAsDraft}>Save as draft</DefaultButton >
 
                   <DefaultButton id="b2" className={styles.btn} disabled={this.state.savedisable} onClick={this._docSave}>Submit</DefaultButton >
                   <DefaultButton id="b1" className={styles.btn} onClick={this._onCancel}>Cancel</DefaultButton >
@@ -1126,17 +1152,17 @@ if (this.state.hideproject == true) {
               <Label >Document : <a href={this.state.linkToDoc}>{this.state.documentName}</a></Label>
 
               <div><Label >Revision : {this.state.revision}</Label></div>
-              <div hidden={this.state.hideproject}><Label>Revision Level : ABT </Label></div>
+              <div hidden={this.state.hideProject}><Label>Revision Level : ABT </Label></div>
 
               <div ><Label >Owner : {this.state.ownerName} </Label></div>
               <div><Label >Due Date : {this.state.dueDate}</Label></div>
 
-              <div><Label>Requester : {this.state.RequesterName} </Label></div>
+              <div><Label>Requester : {this.state.requesterName} </Label></div>
               <div><Label >Requested Date : {this.state.requestedDate} </Label></div>
 
-              <div><Label> Requester Comment : </Label>{ReactHtmlParser(this.state.RequesterComment)}</div>
+              <div><Label> Requester Comment : </Label>{ReactHtmlParser(this.state.requesterComment)}</div>
               <br></br>
-              <div hidden={this.state.hideproject} >
+              <div hidden={this.state.hideProject} >
                 <div className={styles.tableblock} style={{ display: (this.state.dccreviewerData.length == 0 ? 'none' : 'block') }}>
                   <table className={styles.tableClass}   >
                     <tr className={styles.tr}>
@@ -1181,7 +1207,7 @@ if (this.state.hideproject == true) {
               </div>
             </div>
             <div  >
-              <div className={styles.mt} hidden={this.state.hideproject}>
+              <div className={styles.mt} hidden={this.state.hideProject}>
                 <Checkbox label="Publish For Transmittal " onChange={this._onPublishTransmittal} /></div>
               <div className={styles.mt}>
                 <Dropdown
@@ -1203,17 +1229,17 @@ if (this.state.hideproject == true) {
                   required />
                 <div style={{ color: "#dc3545" }}>{this.validator.message("publishFormat", this.state.publishOptionKey, "required")}{" "}</div>
               </div>
-              <div className={styles.mt} hidden={this.state.hideproject} >
+              <div className={styles.mt} hidden={this.state.hideProject} >
                 <div hidden={this.state.hideacceptance}>
                   <Dropdown id="transmittalcode" required={true}
                     placeholder="Select an option"
                     label="Acceptance Code"
-                    options={this.state.AcceptanceCodearray}
-                    onChanged={this.AcceptanceChanged}
-                    selectedKey={this.state.AcceptanceCode}
+                    options={this.state.acceptanceCodearray}
+                    onChanged={this._acceptanceChanged}
+                    selectedKey={this.state.acceptanceCode}
                   /></div></div>
               <div className={styles.mt}>
-                < TextField label="Comments" id="comments" value={this.state.comments} onChange={this._commentschange} multiline required autoAdjustHeight></TextField></div>
+                < TextField label="Comments" id="comments" value={this.state.comments} onChange={this._commentsChange} multiline required autoAdjustHeight></TextField></div>
               <div style={{ color: "#dc3545" }}>{this.validator.message("comments", this.state.comments, "required")}{" "}</div>
               <DialogFooter>
 
@@ -1222,7 +1248,7 @@ if (this.state.hideproject == true) {
                   <div style={{ fontStyle: "italic", fontSize: "12px" }}><span style={{ color: "red", fontSize: "23px" }}>*</span>fields are mandatory </div>
                 </div>
                 <div className={styles.rgtalign} >
-                  <DefaultButton id="b2" className={styles.btn} onClick={this._SaveasDraft}>Save as draft</DefaultButton >
+                  <DefaultButton id="b2" className={styles.btn} onClick={this._saveAsDraft}>Save as draft</DefaultButton >
 
                   <DefaultButton id="b2" className={styles.btn} disabled={this.state.savedisable} onClick={this._docSave}>Submit</DefaultButton >
                   <DefaultButton id="b1" className={styles.btn} onClick={this._onCancel}>Cancel</DefaultButton >

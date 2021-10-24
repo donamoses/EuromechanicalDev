@@ -22,21 +22,26 @@
     "officeFabricIconFontName": "Page",
     "properties": {
       "description": "EMEC_ApprovalWP",
-      "notificationPreference":"Notification Preference Settings",
-      "emailNotification":"Email Nofication Settings",
+      "notificationPreference":"NotificationPreferenceSettings",
+      "emailNotification":"EmailNoficationSettings",
       "hubUrl":"https://ccsdev01.sharepoint.com/sites/emechub/",
-      "userMessageSettings":"User Message Settings",
-      "WorkflowHeaderList":"WorkflowHeader",
-      "DocumentIndexList":"DocumentIndex",
-      "WorkflowDetailsList":"WorkflowDetails",
-      "SourceDocument":"SourceDocuments",
-      "PublishedDocument":"PublishedDocuments",
-      "DocumentRevisionLogList":"DocumentRevisionLog",
-      "TransmittalCodeSettingsList":"TransmittalCodeSettings",
-      "WorkflowTasksList":"Workflow Tasks",
-      "AccessGroups":"Permission Matrix Settings",
-      "DepartmentList":"Department",
-      "SourceDocumentLibrary":"Source Documents"
+      "userMessageSettings":"UserMessageSettings",
+      "workflowHeaderList":"WorkflowHeader",
+      "documentIndexList":"DocumentIndex",
+      "workflowDetailsList":"WorkflowDetails",
+      "sourceDocument":"SourceDocuments",
+      "publishedDocument":"PublishedDocuments",
+      "documentRevisionLogList":"DocumentRevisionLog",
+      "transmittalCodeSettingsList":"TransmittalCodeSettings",
+      "workflowTasksList":"WorkflowTasks",
+      "PermissionMatrixSettings":"PermissionMatrixSettings",
+      "departmentList":"Department",
+      "sourceDocumentLibrary":"Source Documents",
+      "accessGroupDetailsList":"AccessGroupDetails",
+      "hubsite":"emechub",
+      "projectInformationListName":"ProjectInformation"
+      
+     
     }
   }]
 }
