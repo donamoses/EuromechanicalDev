@@ -36,7 +36,8 @@ export default class EmecInboundSubContractorWebPart extends BaseClientSideWebPa
         hubsite:this.properties.hubsite,
         companyList:this.properties.companyList,
         transmittalOutlookLibrary:this.properties.transmittalOutlookLibrary,
-        documentIndexList:this.properties.documentIndexList
+        documentIndexList:this.properties.documentIndexList,
+        transmittalIdSettings:this.properties.transmittalIdSettings
       }
     );
 
@@ -93,6 +94,9 @@ export default class EmecInboundSubContractorWebPart extends BaseClientSideWebPa
                 }),
                 PropertyPaneTextField('documentIndexList', {
                   label: 'Document Index List'
+                }),
+                PropertyPaneTextField('transmittalIdSettings', {
+                  label: 'Transmittal Id Settings '
                 })
               ]
             }

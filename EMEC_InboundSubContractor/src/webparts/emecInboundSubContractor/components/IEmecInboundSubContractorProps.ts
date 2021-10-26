@@ -12,4 +12,5 @@ export interface IEmecInboundSubContractorProps {
   companyList:string;
   transmittalOutlookLibrary:string;
   documentIndexList:string;
+  transmittalIdSettings:string;
 }

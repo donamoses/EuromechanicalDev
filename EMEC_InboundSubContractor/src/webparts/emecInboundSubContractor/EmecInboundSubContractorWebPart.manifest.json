@@ -29,7 +29,8 @@
       "hubUrl":"https://ccsdev01.sharepoint.com/sites/emechub/",
       "companyList":"Companies",
       "transmittalOutlookLibrary":"TransmittalOutlookLibrary",
-      "documentIndexList":"DocumentIndex"
+      "documentIndexList":"DocumentIndex",
+      "transmittalIdSettings":"TransmittalIDSettings"
     }
   }]
 }

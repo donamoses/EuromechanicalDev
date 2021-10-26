@@ -27,14 +27,29 @@ export interface IEmecInboundSubContractorState {
   transmittalOutlookDocumentArray: any[];
   documentIndexArray:any[];
   documentIndexID:any;
+  documentIndexTitle:any;
   revisionCodingId:any;
   isIncrement:boolean;
+  transmittalOutlookId:any;
+  transmittalKey:any;
+  ownerId:any;
+  showGrid:boolean;
+  gridDocument:any[];
+  externalDate:Date;
+  externalComments:any;
+  gridExternalDocument:any[];
+  showExternalGrid:boolean;
+  incrementSequenceNumber:any;
+  transmittalSubContractorId:any;
 
 }
 export default class EmecInboundSubContractor extends React.Component<IEmecInboundSubContractorProps, IEmecInboundSubContractorState, {}> {
   private reqWeb = Web(this.props.hubUrl);
   private currentEmail;
   private currentUserTitle;
+  private currentUserId;
+  private addDocument = [];
+  private addExternalDocument = [];
   public constructor(props: IEmecInboundSubContractorProps) {
     super(props);
     this.state = {
@@ -54,8 +69,20 @@ export default class EmecInboundSubContractor extends React.Component<IEmecInbou
       transmittalOutlookDocumentArray: [],
       documentIndexArray:[],
       documentIndexID:"",
+      documentIndexTitle:"",
       revisionCodingId:"",
-      isIncrement:false
+      isIncrement:false,
+      transmittalOutlookId:"",
+      transmittalKey:"",
+      ownerId:"",
+      showGrid:true,
+      gridDocument:[],
+      externalDate:null,
+      externalComments:"",
+      gridExternalDocument:[],
+      showExternalGrid:true,
+      incrementSequenceNumber:"",
+      transmittalSubContractorId:""
     };
     this._bindData = this._bindData.bind(this);
     this._getSubContractor = this._getSubContractor.bind(this);
@@ -74,6 +101,15 @@ export default class EmecInboundSubContractor extends React.Component<IEmecInbou
     this._onIncrementRevisionChecked = this._onIncrementRevisionChecked.bind(this);
     this._commentschange = this._commentschange.bind(this);
     this._addindex =this._addindex.bind(this);
+    this._onTransmittalSettingsChange =this._onTransmittalSettingsChange.bind(this);
+    this._onRevisionCodingChange = this._onRevisionCodingChange.bind(this);
+    this._onDatePickerChange = this._onDatePickerChange.bind(this);
+    this._externalCommentsChange = this._externalCommentsChange.bind(this);
+    this._addexternalindex = this._addexternalindex.bind(this);
+    this._saveAsDraft = this._saveAsDraft.bind(this);
+    this._idGeneration = this._idGeneration.bind(this);
+    this._transmittalSequenceNumber = this._transmittalSequenceNumber.bind(this);
+
 
 
 
@@ -83,6 +119,7 @@ export default class EmecInboundSubContractor extends React.Component<IEmecInbou
     const user = await sp.web.currentUser.get();
     this.currentEmail = user.Email;  
     this.currentUserTitle = user.Title;
+    this.currentUserId = user.Id;
     let getdccreviewer = [];
     getdccreviewer.push(this.currentUserTitle);
     this.setState({
@@ -91,6 +128,7 @@ export default class EmecInboundSubContractor extends React.Component<IEmecInbou
     let today = new Date();
     this.setState({
       recievedDate:today,
+      externalDate:today
     });
 
     this._bindData();
@@ -230,7 +268,9 @@ export default class EmecInboundSubContractor extends React.Component<IEmecInbou
     
       this.setState({
          documentIndexID: option.key,
+         documentIndexTitle:option.text,
          owner:documentIndexItem[0].Owner.Title,
+         ownerId:documentIndexItem[0].Owner.ID,
          revisionCodingId:documentIndexItem[0].RevisionCoding.ID
          });
    
@@ -240,7 +280,8 @@ export default class EmecInboundSubContractor extends React.Component<IEmecInbou
     const document = await sp.web.getList(this.props.siteUrl + "/" + this.props.transmittalOutlookLibrary).items.getById(option.key).get();
     this.setState({
       subContractorNumber:document.SubContractorDocumentId,
-      poNumber:document.PONumber
+      poNumber:document.PONumber,
+      transmittalOutlookId:option.key
       });
    }
   public _dccChange = (items: any[]) => {
@@ -264,7 +305,7 @@ export default class EmecInboundSubContractor extends React.Component<IEmecInbou
       getSelectedOwner.push(items[item].id);
     }
     this.setState({
-      owner: getSelectedOwner[0]
+      ownerId: getSelectedOwner[0]
     });
   }
   private _onRecievedDatePickerChange = (date?: Date): void => {
@@ -278,38 +319,166 @@ export default class EmecInboundSubContractor extends React.Component<IEmecInbou
   public _poNumberChange= (ev: React.FormEvent<HTMLInputElement>, poNumber?: string) => {
     this.setState({ poNumber: poNumber || '' });
    }
+  public _onTransmittalSettingsChange(option: { key: any; text: any }) {
+    this.setState({ transmittalKey: option.key });
+  }
+  public _onRevisionCodingChange(option: { key: any; text: any }) {
+    this.setState({ revisionCodingId: option.key });
+  }
   private _onIncrementRevisionChecked = (ev: React.FormEvent<HTMLInputElement>, isChecked?: boolean) => {
     if (isChecked) {
       this.setState({ isIncrement: true});
+     }
+     else{
+      this.setState({ isIncrement: false});
      }
     }
   //Comment Change
   public _commentschange = (ev: React.FormEvent<HTMLInputElement>, comments?: any) => {
     this.setState({ comments: comments });
   }
-  public _addindex() {
-    if ((document.querySelector("myfile") as HTMLInputElement).files[0] != null) {
-      let input = document.getElementById("myfile") as HTMLInputElement;
-        var fileCount = input.files.length;
-        alert(fileCount);
-      // var splitted = myfile.name.split(".", 2);
-      
-      // if (myfile.size <= 10485760) {
-      //     sp.web.getFolderByServerRelativeUrl(this.props.siteUrl + "/SourceDocuments/").files.add(this.state.docuid + this.state.title + '.' + splitted[1], myfile, true).then(f => {
-      //         console.log("File Uploaded");
-      //         f.file.getItem().then(item => {
-      //             let sdid=item["ID"].toNumber;
-      //             this.setState({ tempDocId:sdid});
-      //         });
-      //       });
-      //     }
+  public async _addindex() {
+    
+    if ((document.querySelector("#newfile") as HTMLInputElement).files[0] != null) {
+      let myfile = (document.querySelector("#newfile") as HTMLInputElement).files[0];
+      var docname = myfile.name;
+      alert(docname);
+      if (myfile.size <= 10485760) {
+        sp.web.getFolderByServerRelativeUrl(this.props.siteUrl + "/InboundTemperory").files.add(docname, myfile, true)
+        .then(fileUploaded => {
+            console.log("File Uploaded");
+            fileUploaded.file.getItem().then(item=> {
+                let DocId=item["ID"];
+                item.update({ 
+                  SubContractor: this.state.subContractorkey,
+                  DocumentControllerId: this.currentUserId,
+                  // TransmittalOutlookLibraryId:this.state.transmittalOutlookId,
+                  DocumentIndexId:this.state.documentIndexID,
+                  OwnerId:this.state.ownerId,
+                  SubContractorDocId:this.state.subContractorNumber,
+                  ReceivedDate:this.state.recievedDate,
+                  PONumber:this.state.poNumber,
+                  TransmittalCodeId:this.state.transmittalKey,
+                  RevisionCodeId:this.state.revisionCodingId,
+                  IncrementRevision:this.state.isIncrement,
+                  Comments:this.state.comments
+                 });
+                 this.addDocument.push({
+                  SubContractor: this.state.subContractorkey,
+                  DocumentControllerId: this.currentUserId,
+                  // TransmittalOutlookLibraryId:this.state.transmittalOutlookId,
+                  DocumentIndexId:this.state.documentIndexID,
+                  DocumentIndex:this.state.documentIndexTitle,
+                  OwnerId:this.state.ownerId,
+                  Owner:this.state.owner,
+                  SubContractorDocId:this.state.subContractorNumber,
+                  ReceivedDate:moment(this.state.recievedDate).format("DD/MM/YYYY hh:mm a"),
+                  PONumber:this.state.poNumber,
+                  TransmittalCodeId:this.state.transmittalKey,
+                  RevisionCodeId:this.state.revisionCodingId,
+                  IncrementRevision:this.state.isIncrement,
+                  Comments:this.state.comments
+              });
+              console.log(this.addDocument);
+            this.setState({
+                            gridDocument:this.addDocument,
+                            showGrid:false
+                        });
+             });
+          });
+        }
+        }
+        else if(this.state.transmittalOutlookId != "" ){
+          const document = await sp.web.getList(this.props.siteUrl + "/" + this.props.transmittalOutlookLibrary).items.getById(parseInt(this.state.transmittalOutlookId)).get();
+         console.log(document);
+         sp.web.getFileByServerRelativeUrl(this.props.siteUrl + "/"+this.props.transmittalOutlookLibrary+"/" + this.state.transmittalOutlookId.toString()).getItem()
+         .then(templateData => {
+            //  return sp.web.getFolderByServerRelativeUrl(this.props.siteUrl + "/SourceDocuments/")
+            //      .files.add(this.state.docExtension, templateData, true);
+         }).then(f => {
+            //  console.log("File Uploaded");
+            //  f.file.getItem().then(item => {
+            //      let sourceDocId=item["ID"].toNumber;
+            //  });
+            });
+          this.setState({
+           
+            });
+
         }
         else{
-          alert("no document")
+          alert("no document");
         }
 
    }
-  public _saveAsDraft(){ }
+   public itemDeleteFromGrid(items,key){
+
+   }
+   public _onDatePickerChange= (date?: Date): void => {
+    this.setState({ externalDate: date });
+  }
+   public _externalCommentsChange= (ev: React.FormEvent<HTMLInputElement>, comments?: any) => {
+    this.setState({ externalComments: comments });
+   }
+   public _addexternalindex(){
+    if ((document.querySelector("#externalFile") as HTMLInputElement).files[0] != null) {
+      let myfile = (document.querySelector("#externalFile") as HTMLInputElement).files[0];
+      var docname = myfile.name;
+      alert(docname);
+      this.addExternalDocument.push({
+        Name: myfile,
+        DocName: docname,
+        ExternalDate:moment(this.state.externalDate).format("DD/MM/YYYY hh:mm a"),
+        Comments:this.state.externalComments
+    });
+    console.log(this.addExternalDocument);
+  this.setState({
+                  gridExternalDocument:this.addExternalDocument,
+                  showExternalGrid:false
+              });
+        }
+        
+        else{
+          alert("no document");
+        }
+   }
+  public async _saveAsDraft(){
+    this._idGeneration();
+   }
+   public _idGeneration(){
+    let prefix;
+    let separator;
+    let sequenceNumber;
+    let title;
+    let counter;
+    let transmittalSubContractorId;
+   
+    sp.web.getList(this.props.siteUrl+"/Lists/"+this.props.transmittalIdSettings).items.filter("TransmittalCategory eq 'Inbound Sub-contractor'").get().then(transmittalIdSettingsItems =>{
+      console.log("transmittalIdSettingsItems",transmittalIdSettingsItems);
+      prefix = transmittalIdSettingsItems[0].Prefix;
+      separator = transmittalIdSettingsItems[0].Separator;
+      sequenceNumber = transmittalIdSettingsItems[0].SequenceNumber;
+      title = transmittalIdSettingsItems[0].Title;
+      counter = transmittalIdSettingsItems[0].Counter;
+      let increment =counter+1;
+      var incrementvalue =increment.toString();
+      this._transmittalSequenceNumber(incrementvalue,sequenceNumber);
+      transmittalSubContractorId = prefix+separator+title+separator+this.state.projectNumber+separator+this.state.incrementSequenceNumber;
+      console.log("transmittalID",transmittalSubContractorId);
+      this.setState({
+        transmittalSubContractorId :  transmittalSubContractorId,
+       });
+    });
+   }
+   private _transmittalSequenceNumber(incrementvalue, sequenceNumber) {
+    var incrementSequenceNumber = incrementvalue;
+    while (incrementSequenceNumber.length < sequenceNumber)
+    incrementSequenceNumber = "0" + incrementSequenceNumber;
+     console.log(incrementSequenceNumber);
+     this.setState({
+      incrementSequenceNumber :  incrementSequenceNumber,
+     });
+  }
   public _submit(){ }
   public _onCancel(){ }
 
@@ -364,7 +533,7 @@ export default class EmecInboundSubContractor extends React.Component<IEmecInbou
         <div className={styles.divrow}>
           <div className={styles.wdthrgt}>
             <Label >Upload Document:</Label>
-            <input type="file" id="myfile"></input>
+            <input type="file" name="myFile" id="newfile"></input>
           </div>
           <div className={styles.wdthlft} >
             <Dropdown
@@ -402,22 +571,92 @@ export default class EmecInboundSubContractor extends React.Component<IEmecInbou
           </div>
         </div>
         <div className={styles.divrow}>
-          <div className={styles.wdthrgt}><TextField label="SubContractor Doc No" onChange={this._subContractorNumberChange} value={this.state.subContractorNumber}></TextField></div>
-          <div className={styles.wdthlft}><DatePicker label="Recieved Date" value={this.state.recievedDate} onSelectDate={this._onRecievedDatePickerChange} placeholder="Select a date" /></div>
+          <div className={styles.wdthrgt}>
+            <TextField label="SubContractor Doc No" onChange={this._subContractorNumberChange} value={this.state.subContractorNumber}></TextField>
+            </div>
+          <div className={styles.wdthlft}>
+            <DatePicker label="Recieved Date" value={this.state.recievedDate} onSelectDate={this._onRecievedDatePickerChange} placeholder="Select a date" />
+            </div>
         </div>
         <div className={styles.divrow}>
-          <div className={styles.wdthrgt}><TextField label="PO Number" onChange={this._poNumberChange} value={this.state.poNumber}></TextField></div>
-          <div className={styles.wdthlft}> <Dropdown placeholder="Select Transmittal Code" label="Transmittal Code" options={this.state.transmittalSettingsArray} /></div>
+          <div className={styles.wdthrgt}>
+            <TextField label="PO Number" onChange={this._poNumberChange} value={this.state.poNumber}></TextField>
+            </div>
+          <div className={styles.wdthlft}>
+            <Dropdown placeholder="Select Transmittal Code" label="Transmittal Code" options={this.state.transmittalSettingsArray} onChanged={this._onTransmittalSettingsChange}/>
+            </div>
         </div>
         <div className={styles.divrow}>
-          <div className={styles.wdthrgt}> <Dropdown placeholder="Select Revision Code" label="Revision Code" options={this.state.revisionSettingsArray} selectedKey={this.state.revisionCodingId} /></div>
-          <div className={styles.wdthlft} style={{ marginTop: "5%" }}><Checkbox label="Increment Revision ? " boxSide="end" onChange={this._onIncrementRevisionChecked} /></div>
+          <div className={styles.wdthrgt}>
+            <Dropdown placeholder="Select Revision Code" label="Revision Code" options={this.state.revisionSettingsArray} selectedKey={this.state.revisionCodingId} onChanged={this._onRevisionCodingChange}/>
+            </div>
+          <div className={styles.wdthlft} style={{ marginTop: "5%" }}>
+            <Checkbox label="Increment Revision ? " boxSide="end" onChange={this._onIncrementRevisionChecked} />
+            </div>
         </div>
         <div className={styles.divrow}>
           <div style={{ width: "80%" }} >< TextField label="Comments" id="comments" value={this.state.comments} onChange={this._commentschange} multiline required autoAdjustHeight></TextField></div>
           <div><IconButton iconProps={AddIcon} title="Addindex" ariaLabel="Addindex" onClick={this._addindex} style={{ padding: "58px 0px 0px 45px" }} /></div>
         </div>
+        <table className={styles.tableModal}  hidden={this.state.showGrid} >
+                                <tr style={{background: "#f4f4f4"}}>
+                                  <th style={{ padding: "5px 10px" }} >Slno</th>
+                                  <th style={{ padding: "5px 10px" }}>DocumentIndex</th>
+                                  <th style={{ padding: "5px 10px" }}>SubContractor Doc No</th>
+                                 <th style={{ padding: "5px 10px" }}>ReceivedDate</th>
+                                  <th style={{ padding: "5px 10px" }}>Owner</th>
+                                  <th style={{ padding: "5px 10px" }}>Comments</th>             
+                                  <th style={{ padding: "5px 10px" }}>Delete</th>
+                                </tr>
+                                {this.state.gridDocument.map((items,key)=>{
+                                  return(
+                                    <tr style={{borderBottom:"1px solid #f4f4f4"}}>
+                                    <td style={{ padding: "5px 10px" }}>{key+1}</td>
+                                     <td style={{ padding: "5px 10px" }}>{items.DocumentIndex} </td>
+                                    <td style={{ padding: "5px 10px" }}>{items.SubContractorDocId} </td>
+                                    <td style={{ padding: "5px 10px" }}>{items.ReceivedDate}</td>
+                                    <td style={{ padding: "5px 10px" }}>{items.Owner} </td>
+                                    <td style={{ padding: "5px 10px" }}>{items.Comments}</td>       
+                                    <td style={{ padding: "5px 10px" }}><IconButton iconProps={DeleteIcon} title="Delete" ariaLabel="Delete" onClick={()=>this.itemDeleteFromGrid(items,key)}/></td>
+                                  </tr>
+                                  );
+                                })}
+                               
+                          </table>
         <hr />
+        <Label>Additional Document </Label>
+        <div className={styles.divrow}>
+          <div className={styles.wdthrgt}>
+            <Label >Upload Document:</Label>
+            <input type="file" name="externalFile" id="externalFile"></input>
+          </div>
+          <div className={styles.wdthlft}><DatePicker label="Date" value={this.state.externalDate} onSelectDate={this._onDatePickerChange} placeholder="Select a date" /></div>
+         </div>
+         <div className={styles.divrow}>
+          <div style={{ width: "80%" }} >< TextField label="Comments" id="comments" value={this.state.externalComments} onChange={this._externalCommentsChange} multiline required autoAdjustHeight></TextField></div>
+          <div><IconButton iconProps={AddIcon} title="Addindex" ariaLabel="Addindex" onClick={this._addexternalindex} style={{ padding: "58px 0px 0px 45px" }} /></div>
+        </div>
+        <table className={styles.tableModal}  hidden={this.state.showExternalGrid} >
+                                <tr style={{background: "#f4f4f4"}}>
+                                  <th style={{ padding: "5px 10px" }} >Slno</th>
+                                  <th style={{ padding: "5px 10px" }}>Doc Name</th>
+                                  <th style={{ padding: "5px 10px" }}>ReceivedDate</th>
+                                  <th style={{ padding: "5px 10px" }}>Comments</th>             
+                                  <th style={{ padding: "5px 10px" }}>Delete</th>
+                                </tr>
+                                {this.state.gridExternalDocument.map((items,key)=>{
+                                  return(
+                                    <tr style={{borderBottom:"1px solid #f4f4f4"}}>
+                                    <td style={{ padding: "5px 10px" }}>{key+1}</td>
+                                     <td style={{ padding: "5px 10px" }}>{items.DocName} </td>
+                                   <td style={{ padding: "5px 10px" }}>{items.ExternalDate}</td>
+                                    <td style={{ padding: "5px 10px" }}>{items.Comments}</td>       
+                                    <td style={{ padding: "5px 10px" }}><IconButton iconProps={DeleteIcon} title="Delete" ariaLabel="Delete" onClick={()=>this.itemDeleteFromGrid(items,key)}/></td>
+                                  </tr>
+                                  );
+                                })}
+                               
+                          </table>
         <DialogFooter>
 
 
